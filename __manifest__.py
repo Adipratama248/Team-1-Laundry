@@ -2,10 +2,10 @@
 {
     'name': "laundry",
 
-    'summary': "Short (1 phrase/line) summary of the module's purpose",
+    'summary': "Laundry Services Management",
 
     'description': """
-Long description of module's purpose
+Module for managing laundry services with master data for various laundry products.
     """,
 
     'author': "My Company",
@@ -22,13 +22,7 @@ Long description of module's purpose
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
+        'views/laundry_service.xml',
     ],
 }
 

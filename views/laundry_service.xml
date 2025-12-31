@@ -1,0 +1,59 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+    <record model="ir.ui.view" id="laundry.list">
+      <field name="name">Laundry Service List</field>
+      <field name="model">laundry.service</field>
+      <field name="arch" type="xml">
+        <list>
+          <field name="name"/>
+          <field name="category"/>
+          <field name="unit"/>
+          <field name="price"/>
+          <field name="estimated_time"/>
+          <field name="service_type"/>
+          <field name="tax_rate"/>
+          <field name="active"/>
+        </list>
+      </field>
+    </record>
+
+    <!-- explicit form view definition -->
+    <record model="ir.ui.view" id="laundry.form">
+      <field name="name">Laundry Service Form</field>
+      <field name="model">laundry.service</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <field name="name"/>
+              <field name="category"/>
+              <field name="unit"/>
+              <field name="price"/>
+              <field name="estimated_time"/>
+              <field name="service_type"/>
+              <field name="tax_rate"/>
+              <field name="active"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!-- actions opening views on models -->
+    <record model="ir.actions.act_window" id="laundry.action_window">
+      <field name="name">Laundry Services</field>
+      <field name="res_model">laundry.service</field>
+      <field name="view_mode">list,form</field>
+    </record>
+
+
+    <!-- Top menu item -->
+    <menuitem name="Laundry" id="laundry.menu_root"/>
+    <!-- menu categories -->
+    <menuitem name="Services" id="laundry.menu_services" parent="laundry.menu_root"/>
+    <!-- actions -->
+    <menuitem name="Laundry Services" id="laundry.menu_services_list" parent="laundry.menu_services"
+              action="laundry.action_window"/>
+  </data>
+</odoo>
