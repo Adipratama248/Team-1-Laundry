@@ -1,5 +1,6 @@
 <odoo>
   <data>
+    <menuitem id="menu_root" name="Laundry" sequence="10"/>
     <!-- explicit list view definition -->
 <!--
     <record model="ir.ui.view" id="laundry.list">
