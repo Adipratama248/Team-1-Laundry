@@ -60,6 +60,6 @@
     </record>
 
     <!-- Menu Item for Layanan -->
-    <menuitem id="menu_layanan" name="Layanan" action="action_layanan" parent="menu_root"/>
+    <menuitem id="menu_layanan" name="Layanan" action="action_layanan" parent="laundry_menu_root"/>
 
 </odoo>
