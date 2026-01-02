@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- list View for Operator -->
+    <record id="view_operator_list" model="ir.ui.view">
+        <field name="name">cdn.operator.list</field>
+        <field name="model">cdn.operator</field>
+        <field name="arch" type="xml">
+            <list string="Operator">
+                <field name="name"/>
+                <field name="street" string="Alamat"/>
+                <field name="jenis_kelamin" />
+                <field name="mobile" string="No HP"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View for Operator -->
+    <record id="view_operator_form" model="ir.ui.view">
+        <field name="name">cdn.operator.form</field>
+        <field name="model">cdn.operator</field>
+        <field name="arch" type="xml">
+            <form string="Operator">
+                <sheet>
+                    <group>
+                        <field name="name" string="Nama Operator"/>
+                        <field name="street" string="Alamat"/>
+                        <field name="jenis_kelamin"/>
+                        <field name="mobile" string="No HP"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for Operator -->
+    <record id="action_operator" model="ir.actions.act_window">
+        <field name="name">Operator</field>
+        <field name="res_model">cdn.operator</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu Item for Operator -->
+    <menuitem id="menu_operator" name="Operator" action="action_operator" parent="laundry_menu_root"/>
+
+</odoo>

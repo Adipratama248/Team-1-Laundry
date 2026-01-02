@@ -27,6 +27,7 @@ Long description of module's purpose
         
         'views/menu.xml',
         'views/pelanggan.xml',
+        'views/operator.xml',
         'views/layanan.xml',
         'views/provinsi.xml',
         'views/kota.xml',
