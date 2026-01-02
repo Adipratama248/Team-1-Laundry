@@ -7,9 +7,10 @@
         <field name="arch" type="xml">
             <list string="Pelanggan">
                 <field name="no_pelanggan"/>
-                <field name="nama_pelanggan"/>
-                <field name="no_hp"/>
-                <field name="alamat"/>
+                <field name="name"/>
+                <field name="street" string="Alamat"/>
+                <field name="jenis_kelamin" />
+                <field name="mobile" string="No HP"/>
             </list>
         </field>
     </record>
@@ -30,11 +31,16 @@
                         </h1>
                     </div>
                     <group>
-                        <field name="nama_pelanggan"/>
+                        <field name="name"/>
+                        <field name="mobile" string="No HP"/>
+                        <field name="jenis_kelamin"/>
                     </group>
                     <group>
-                        <field name="no_hp"/>
-                        <field name="alamat"/>
+                        <field name="street" string="Alamat"/> 
+                        <field name="provinsi_id" domain="[('kode', '=', '35')]"/>
+                        <field name="kota_id" domain="[('provinsi_id','=',provinsi_id), ('kode', 'in', ['3507', '3573'])]"/>
+                        <field name="kecamatan_id" domain="[('kota_id','=',kota_id)]"/>
+                        <field name="desa_id" domain="[('kecamatan_id','=',kecamatan_id)]"/>
                     </group>
                 </sheet>
             </form>
@@ -49,6 +55,6 @@
     </record>
 
     <!-- Menu Item for Pelanggan -->
-    <menuitem id="menu_pelanggan" name="Pelanggan" action="action_pelanggan" parent="menu_root"/>
+    <menuitem id="menu_pelanggan" name="Pelanggan" action="action_pelanggan" parent="laundry_menu_root"/>
 
 </odoo>

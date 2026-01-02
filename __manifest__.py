@@ -24,10 +24,16 @@ Long description of module's purpose
     'data': [
         'security/ir.model.access.csv',
         'data/sequences.xml',
-        'views/views.xml',
-        'views/templates.xml',
+        
+        'views/menu.xml',
         'views/pelanggan.xml',
+        'views/operator.xml',
         'views/layanan.xml',
+        'views/provinsi.xml',
+        'views/kota.xml',
+        'views/kecamatan.xml',
+        'views/desa.xml',
+
     ],
     # only loaded in demonstration mode
     'demo': [

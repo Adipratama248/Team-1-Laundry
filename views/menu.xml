@@ -1,0 +1,34 @@
+<data>
+        <!-- Menu Utama -->
+    <menuitem
+        id="laundry_menu_root"
+        name="laundry"
+        sequence="0"
+        web_icon="laundry,static/description/icon.png"/>
+
+        <!-- Sub Menu Level 1 -->
+    <menuitem
+        id="pelanggan_menu_categ"
+        name="Pelanggan"
+        parent="laundry_menu_root" 
+        sequence="10"/>
+
+    <menuitem
+        id="operator_menu_categ"
+        name="Operator"
+        parent="laundry_menu_root"
+        sequence="20"/>
+
+    <menuitem
+        id="pengaturan_menu_categ"
+        name="Pengaturan"
+        parent="laundry_menu_root"
+        sequence="30"/>
+
+    <!-- Sub Menu Level 2 -->
+    <menuitem
+        id="wilayah_menu_categ"
+        name="Wilayah"
+        parent="pengaturan_menu_categ"
+        sequence="10"/>
+</data>
