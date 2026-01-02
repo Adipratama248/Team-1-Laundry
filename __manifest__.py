@@ -2,10 +2,10 @@
 {
     'name': "laundry",
 
-    'summary': "Laundry Services Management",
+    'summary': "Short (1 phrase/line) summary of the module's purpose",
 
     'description': """
-Module for managing laundry services with master data for various laundry products.
+Long description of module's purpose
     """,
 
     'author': "My Company",
@@ -18,11 +18,20 @@ Module for managing laundry services with master data for various laundry produc
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base'],
+    'depends': ['base', 'product'],
 
     # always loaded
     'data': [
-        'views/laundry_service.xml',
+        'security/ir.model.access.csv',
+        'data/sequences.xml',
+        'views/views.xml',
+        'views/templates.xml',
+        'views/pelanggan.xml',
+        'views/layanan.xml',
+    ],
+    # only loaded in demonstration mode
+    'demo': [
+        'demo/demo.xml',
     ],
 }
 

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- list View for Pelanggan -->
+    <record id="view_pelanggan_list" model="ir.ui.view">
+        <field name="name">cdn.pelanggan.list</field>
+        <field name="model">cdn.pelanggan</field>
+        <field name="arch" type="xml">
+            <list string="Pelanggan">
+                <field name="no_pelanggan"/>
+                <field name="nama_pelanggan"/>
+                <field name="no_hp"/>
+                <field name="alamat"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View for Pelanggan -->
+    <record id="view_pelanggan_form" model="ir.ui.view">
+        <field name="name">cdn.pelanggan.form</field>
+        <field name="model">cdn.pelanggan</field>
+        <field name="arch" type="xml">
+            <form string="Pelanggan">
+                <sheet>
+                    <div class="oe_title">
+                        <h3>
+                            <label for="no_pelanggan" string="No Pelanggan"/>
+                        </h3>
+                        <h1>
+                            <field name="no_pelanggan"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="nama_pelanggan"/>
+                    </group>
+                    <group>
+                        <field name="no_hp"/>
+                        <field name="alamat"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for Pelanggan -->
+    <record id="action_pelanggan" model="ir.actions.act_window">
+        <field name="name">Pelanggan</field>
+        <field name="res_model">cdn.pelanggan</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu Item for Pelanggan -->
+    <menuitem id="menu_pelanggan" name="Pelanggan" action="action_pelanggan" parent="menu_root"/>
+
+</odoo>
