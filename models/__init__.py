@@ -3,6 +3,7 @@
 from . import models
 from . import wilayah
 from . import res_partner_inherit
-from . import pelanggan,operator
+from . import pelanggan
+from . import operator
 from . import layanan
 
