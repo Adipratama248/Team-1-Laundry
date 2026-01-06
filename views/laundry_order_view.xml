@@ -30,7 +30,7 @@
                 <header>
                     <field name="state" widget="statusbar" statusbar_visible="draft,received,washing,drying,ironing,qc,ready,delivered"/>
                     <button name="action_received" string="Received" type="object" class="btn-primary" invisible="state != 'draft'"/>
-                    <button name="%(Team-1-Laundry.action_laundry_process_wizard)d" string="Start Process" type="action" invisible="state not in ('received', 'washing', 'drying')"/>
+                    <button name="%(laundry.action_laundry_process_wizard)d" string="Start Process" type="action" invisible="state not in ('received', 'washing', 'drying')"/>
                     <button name="action_qc" string="QC" type="object" invisible="state != 'ironing'"/>
                     <button name="action_open_qc" string="Open QC" type="object" invisible="state != 'qc'"/>
                     <button name="action_ready" string="Ready" type="object" invisible="state != 'qc'"/>
@@ -63,7 +63,7 @@
                             <field name="line_ids">
                                 <list editable="bottom">
                                     <field name="product_id"/>
-                                    <field name="uom_id"/>
+                                    <field name="uom_id" string="Satuan"/>
                                     <field name="quantity"/>
                                     <field name="price_unit"/>
                                     <field name="subtotal" readonly="1"/>

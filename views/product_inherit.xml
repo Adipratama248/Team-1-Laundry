@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="product_template_laundry_inherit_view_form" model="ir.ui.view">
+            <field name="name">product.template.laundry.inherit.view.form</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view"/>
+            <field name="arch" type="xml">
+                <field name="type" position="after">
+                    <field name="is_laundry_service"/>
+                </field>
+                
+                <notebook position="inside">
+                    <page string="Laundry Service" invisible="is_laundry_service == False">
+                        <group>
+                            <field name="service_type"/>
+                            <field name="category_service"/>
+                            <field name="uom_id" string="Satuan"/>
+                            <field name="uom_po_id" string="Satuan PO"/>
+                            <field name="estimated_hours"/>
+                        </group>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+    </data>
+</odoo>
