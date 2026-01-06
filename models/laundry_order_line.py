@@ -1,0 +1,67 @@
+# -*- coding: utf-8 -*-
+
+from odoo import models, fields, api
+
+
+class LaundryOrderLine(models.Model):
+    _name = 'laundry.order.line'
+    _description = 'Laundry Order Line'
+
+    laundry_order_id = fields.Many2one(
+        'laundry.order',
+        string='Laundry Order',
+        required=True,
+        ondelete='cascade'
+    )
+
+    product_id = fields.Many2one(
+        'product.product',
+        string='Service',
+        required=True,
+        domain=[('type', '=', 'service')]
+    )
+
+    uom_id = fields.Many2one(
+        'uom.uom',
+        string='Unit of Measure',
+        required=True
+    )
+
+    quantity = fields.Float(
+        string='Quantity',
+        default=1.0
+    )
+
+    price_unit = fields.Float(
+        string='Unit Price'
+    )
+
+    subtotal = fields.Monetary(
+        string='Subtotal',
+        compute='_compute_subtotal',
+        store=True,
+        currency_field='currency_id'
+    )
+
+    currency_id = fields.Many2one(
+        'res.currency',
+        related='laundry_order_id.currency_id',
+        readonly=True
+    )
+
+    @api.depends('quantity', 'price_unit')
+    def _compute_subtotal(self):
+        for line in self:
+            line.subtotal = line.quantity * line.price_unit
+
+    @api.onchange('product_id')
+    def _onchange_product(self):
+        if self.product_id:
+            self.price_unit = self.product_id.lst_price
+            self.uom_id = self.product_id.uom_id
+
+    # (OPTIONAL) LINK KE SALES ORDER LINE
+    sale_line_id = fields.Many2one(
+        'sale.order.line',
+        string='Sales Order Line'
+    )
