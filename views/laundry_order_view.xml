@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- list VIEW -->
+    <record id="view_laundry_order_list" model="ir.ui.view">
+        <field name="name">laundry.order.list</field>
+        <field name="model">laundry.order</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="date_received"/>
+                <field name="date_estimated"/>
+                <field name="weight_kg"/>
+                <field name="qty_pcs"/>
+                <field name="state"/>
+                <field name="total_amount"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_laundry_order_form" model="ir.ui.view">
+        <field name="name">laundry.order.form</field>
+        <field name="model">laundry.order</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Laundry Order">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,received,washing,drying,ironing,qc,ready,delivered"/>
+                    <button name="action_received" string="Received" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="%(Team-1-Laundry.action_laundry_process_wizard)d" string="Start Process" type="action" invisible="state not in ('received', 'washing', 'drying')"/>
+                    <button name="action_qc" string="QC" type="object" invisible="state != 'ironing'"/>
+                    <button name="action_open_qc" string="Open QC" type="object" invisible="state != 'qc'"/>
+                    <button name="action_ready" string="Ready" type="object" invisible="state != 'qc'"/>
+                    <button name="action_delivered" string="Delivered" type="object" invisible="state != 'ready'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('delivered', 'cancel')"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="partner_id"/>
+                            <field name="sale_order_id" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+
+                        <group>
+                            <field name="date_received"/>
+                            <field name="date_estimated"/>
+                            <field name="date_finished" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <field name="weight_kg"/>
+                        <field name="qty_pcs"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Laundry Items">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="uom_id"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                    <field name="subtotal" readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Notes">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+
+                    <group>
+                        <field name="total_amount" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_laundry_order_search" model="ir.ui.view">
+        <field name="name">laundry.order.search</field>
+        <field name="model">laundry.order</field>
+        <field name="type">search</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <filter name="filter_today" string="Today"
+                        domain="[('date_received','>=',context_today())]"/>
+                <filter name="filter_not_finished" string="Not Finished"
+                        domain="[('state','not in',('delivered','cancel'))]"/>
+                <group expand="0" string="Group By">
+                    <filter name="groupby_state" string="Status" domain="[]" context="{'group_by':'state'}"/>
+                    <filter name="groupby_partner" string="Customer" domain="[]" context="{'group_by':'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="laundry_action_laundry_order" model="ir.actions.act_window">
+        <field name="name">Laundry Orders</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">laundry.order</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

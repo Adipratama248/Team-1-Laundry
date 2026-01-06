@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- MENU -->
+    <menuitem id="menu_laundry_root" name="Laundry" sequence="10" web_icon="fa fa-tshirt"/>
+
+    <!-- Dashboard -->
+    <menuitem id="menu_laundry_dashboard" name="Dashboard" parent="menu_laundry_root" sequence="1"/>
+
+    <!-- Orders -->
+    <menuitem id="menu_laundry_orders" name="Laundry Orders" parent="menu_laundry_root" sequence="2" action="laundry_action_laundry_order"/>
+
+    <!-- Operations -->
+    <menuitem id="menu_laundry_operation" name="Operations" parent="menu_laundry_root" sequence="3"/>
+    <menuitem id="menu_laundry_process_log" name="Process Logs" parent="menu_laundry_operation" sequence="1" action="laundry_action_laundry_process_log"/>
+    <menuitem id="menu_laundry_qc" name="QC" parent="menu_laundry_operation" sequence="2" action="laundry_action_laundry_qc"/>
+
+    <!-- Reports -->
+    <menuitem id="menu_laundry_reports" name="Reports" parent="menu_laundry_root" sequence="4"/>
+    <menuitem id="menu_laundry_reports_laundry" name="Laundry Report" parent="menu_laundry_reports" sequence="1"/>
+    <menuitem id="menu_laundry_reports_revenue" name="Revenue" parent="menu_laundry_reports" sequence="2"/>
+
+    <!-- Configuration -->
+    <menuitem id="menu_laundry_configuration" name="Configuration" parent="menu_laundry_root" sequence="5"/>
+    <menuitem id="menu_laundry_configuration_services" name="Services" parent="menu_laundry_configuration" sequence="1" action="product.product_normal_action_sell"/>
+    <menuitem id="menu_laundry_configuration_uom" name="UoM" parent="menu_laundry_configuration" sequence="2"/>
+    <menuitem id="menu_laundry_configuration_settings" name="Settings" parent="menu_laundry_configuration" sequence="3"/>
+
+</odoo>

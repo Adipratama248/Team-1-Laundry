@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Product Form to add Laundry fields -->
+    <record id="view_product_product_laundry_form" model="ir.ui.view">
+        <field name="name">product.product.laundry.form</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='sales']" position="inside">
+                <group string="Laundry Information" name="laundry_info">
+                    <field name="is_laundry_service"/>
+                    <field name="laundry_billing_type"/>
+                    <field name="brand_name"/>
+                    <field name="product_type_laundry"/>
+                    <field name="size_label"/>
+                    <field name="is_consumable_laundry"/>
+                </group>
+                <group string="Consumables" name="consumables" invisible="not is_laundry_service">
+                    <field name="laundry_consumable_lines">
+                        <list editable="bottom">
+                            <field name="consumable_id"/>
+                            <field name="quantity"/>
+                        </list>
+                    </field>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

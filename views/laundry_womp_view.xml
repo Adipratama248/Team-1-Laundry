@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- list -->
+    <record id="view_laundry_womp_list" model="ir.ui.view">
+        <field name="name">laundry.womp.list</field>
+        <field name="model">laundry.womp</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="measurement_type"/>
+                <field name="value"/>
+                <field name="price_per_unit"/>
+                <field name="subtotal" readonly="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="view_laundry_womp_form" model="ir.ui.view">
+        <field name="name">laundry.womp.form</field>
+        <field name="model">laundry.womp</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Laundry Measurement">
+                <group>
+                    <field name="measurement_type"/>
+                    <field name="value"/>
+                    <field name="price_per_unit"/>
+                    <field name="subtotal" readonly="1"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACTION POPUP WOMP -->
+    <record id="action_laundry_womp" model="ir.actions.act_window">
+        <field name="name">Laundry Measurement</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">laundry.womp</field>
+        <field name="view_mode">list,form</field>
+        <field name="target">new</field>
+        <field name="domain">[('order_line_id','=',active_id)]</field>
+        <field name="context">{'default_order_line_id': active_id}</field>
+    </record>
+
+</odoo>

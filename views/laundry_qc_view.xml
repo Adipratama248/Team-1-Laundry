@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- list VIEW -->
+    <record id="view_laundry_qc_list" model="ir.ui.view">
+        <field name="name">laundry.qc.list</field>
+        <field name="model">laundry.qc</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="laundry_order_id"/>
+                <field name="approved_date"/>
+                <field name="approved_by"/>
+                <field name="condition_before"/>
+                <field name="condition_after"/>
+                <field name="note"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_laundry_qc_form" model="ir.ui.view">
+        <field name="name">laundry.qc.form</field>
+        <field name="model">laundry.qc</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Laundry QC">
+                <sheet>
+                    <group>
+                        <field name="laundry_order_id"/>
+                        <field name="approved_date"/>
+                        <field name="approved_by"/>
+                        <field name="condition_before"/>
+                        <field name="condition_after"/>
+                        <field name="note"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="laundry_action_laundry_qc" model="ir.actions.act_window">
+        <field name="name">Laundry QC</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">laundry.qc</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>
