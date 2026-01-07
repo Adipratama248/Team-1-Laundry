@@ -25,6 +25,25 @@ class LaundryOrder(models.Model):
     weight_kg = fields.Float(string='Weight (KG)', digits=(12, 2), tracking=True)
     qty_pcs = fields.Integer(string='Quantity (Pcs)', tracking=True)
     note = fields.Text(string='Notes')
+    category_service = fields.Selection([
+        ('reguler', 'Reguler'), 
+        ('express', 'Express')
+    ], string='Kategori Layanan', compute='_compute_category_service', store=True)
+
+    @api.depends('line_laundry_ids.product_id.category_service')
+    def _compute_category_service(self):
+        for rec in self:
+            # Ambil baris pertama (index 0) sebagai referensi utama order ini
+            # [:1] aman digunakan walau list kosong (tidak error index out of range)
+            first_line = rec.line_laundry_ids[:1]
+            
+            if first_line and first_line.product_id:
+                # Ambil value dari field yang sudah Anda buat di Product Inherit
+                rec.category_service = first_line.product_id.category_service
+            else:
+                # Default jika belum ada produk dipilih
+                rec.category_service = 'reguler'
+                
 
     # --- Workflow State ---
     state = fields.Selection([
@@ -40,10 +59,8 @@ class LaundryOrder(models.Model):
     ], string='Status', default='draft', tracking=True, index=True)
 
     # --- Order Lines ---
-    line_laundry_ids = fields.One2many('laundry.order.line', 'laundry_order_id', string='Laundry Items', 
-                                       domain="[('product_id.is_laundry_service', '=', True)]")
-    line_additional_ids = fields.One2many('laundry.order.line', 'laundry_order_id', string='Produk Tambahan', 
-                                          domain="[('product_id.is_laundry_service', '=', False)]")
+    line_laundry_ids = fields.One2many('laundry.order.line', 'laundry_order_id', string='Laundry Items', domain="[('product_id.is_laundry_service', '=', True)]")
+    line_additional_ids = fields.One2many('laundry.order.line', 'laundry_order_id', string='Produk Tambahan', domain="[('product_id.is_laundry_service', '=', False)]")
     
     # --- Financials ---
     total_amount = fields.Monetary(string='Total', compute='_compute_total', currency_field='currency_id', store=True)
@@ -245,7 +262,10 @@ class LaundryOrder(models.Model):
                 'res_id': qc.id,
             }
         return False
-
+    
+    # ---------------------------------------------------------
+    # workflow statusbar
+    # ---------------------------------------------------------
     workflow_type = fields.Selection([
         ('full', 'Lengkap (CKS)'),
         ('wash', 'Cuci Kering (CK)'),

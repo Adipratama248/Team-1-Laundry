@@ -9,3 +9,4 @@ from . import sale_order_inherit
 from . import product_inherit
 from . import hr_employee
 from . import laundry_womp
+from . import laundry_log
