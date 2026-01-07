@@ -14,6 +14,7 @@
     <menuitem id="menu_laundry_operation" name="Operations" parent="menu_laundry_root" sequence="3"/>
     <menuitem id="menu_laundry_process_log" name="Process Logs" parent="menu_laundry_operation" sequence="1" action="laundry_action_laundry_process_log"/>
     <menuitem id="menu_laundry_qc" name="QC" parent="menu_laundry_operation" sequence="2" action="laundry_action_laundry_qc"/>
+    <menuitem id="menu_laundry_log_analysis" name="Log Pengerjaan" parent="menu_laundry_operation" sequence="3" action="action_laundry_log_analysis"/>
 
     <!-- Reports -->
     <menuitem id="menu_laundry_reports" name="Reports" parent="menu_laundry_root" sequence="4"/>
