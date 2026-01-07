@@ -5,38 +5,12 @@ class LaundryProcessLog(models.Model):
     _description = 'Laundry Process Log'
     _order = 'start_time desc'
 
-    laundry_order_id = fields.Many2one(
-        'laundry.order',
-        string='Laundry Order',
-        required=True,
-        ondelete='cascade'
-    )
-
-    process_type = fields.Selection([
-        ('washing', 'Washing'),
-        ('drying', 'Drying'),
-        ('ironing', 'Ironing'),
-    ], string='Process', required=True)
-
-    employee_id = fields.Many2one(
-        'hr.employee',
-        string='Handled By',
-        required=True
-    )
-
-    start_time = fields.Datetime(
-        string='Start Time',
-        default=fields.Datetime.now
-    )
-
+    laundry_order_id = fields.Many2one('laundry.order', string='Laundry Order', required=True, ondelete='cascade')
+    process_type = fields.Selection([('washing', 'Washing'), ('drying', 'Drying'), ('ironing', 'Ironing')], string='Process', required=True)
+    employee_id = fields.Many2one('hr.employee', string='Handled By', required=True)
+    start_time = fields.Datetime(string='Start Time', default=fields.Datetime.now)
     end_time = fields.Datetime(string='End Time')
-
-    duration = fields.Float(
-        string='Duration (Hours)',
-        compute='_compute_duration',
-        store=True
-    )
-
+    duration = fields.Float(string='Duration (Hours)', compute='_compute_duration', store=True)
     note = fields.Text(string='Note')
 
     @api.depends('start_time', 'end_time')

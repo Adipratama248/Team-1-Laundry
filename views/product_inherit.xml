@@ -13,7 +13,7 @@
                 <notebook position="inside">
                     <page string="Laundry Service" invisible="is_laundry_service == False">
                         <group>
-                            <field name="service_type"/>
+                            <field name="laundry_service_type"/>
                             <field name="category_service"/>
                             <field name="uom_id" string="Satuan"/>
                             <field name="uom_po_id" string="Satuan PO"/>

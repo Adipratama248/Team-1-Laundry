@@ -4,11 +4,7 @@ from odoo import models, fields, api
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    laundry_order_id = fields.Many2one(
-        'laundry.order',
-        string='Laundry Order',
-        readonly=True
-    )
+    laundry_order_id = fields.Many2one('laundry.order', string='Laundry Order', readonly=True)
 
     def action_confirm(self):
         res = super().action_confirm()

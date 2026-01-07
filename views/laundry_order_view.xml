@@ -21,7 +21,7 @@
     </record>
 
     <!-- FORM VIEW -->
-    <record id="view_laundry_order_form" model="ir.ui.view">
+    <!-- <record id="view_laundry_order_form" model="ir.ui.view">
         <field name="name">laundry.order.form</field>
         <field name="model">laundry.order</field>
         <field name="type">form</field>
@@ -53,18 +53,126 @@
                         </group>
                     </group>
 
+                    <notebook>
+                        <page string="Laundry Items">
+                            <field name="line_laundry_ids">
+                                <list editable="bottom">
+                                    <field name="product_id" domain="[('is_laundry_service', '=', True)]"/>
+                                    <field name="uom_id" string="Satuan"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                    <field name="subtotal" readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Produk Tambahan">
+                            <field name="line_additional_ids">
+                                <list editable="bottom">
+                                    <field name="product_id" domain="[('is_laundry_service', '=', False)]"/>
+                                    <field name="uom_id" string="Satuan"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                    <field name="subtotal" readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+
+
                     <group>
-                        <field name="weight_kg"/>
-                        <field name="qty_pcs"/>
+                        <field name="total_amount" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record> -->
+
+    <record id="view_laundry_order_form" model="ir.ui.view">
+        <field name="name">laundry.order.form</field>
+        <field name="model">laundry.order</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Laundry Order">
+                <header>
+                    <!-- 1. TOMBOL UTAMA FLOW (DINAMIS) -->
+                    <!-- Tombol ini akan memanggil fungsi action_next_stage di Python
+                        yang secara cerdas melompati status yang tidak perlu (misal: skip washing jika cuma setrika) -->
+                    <button name="action_next_stage" string="Proses Selanjutnya" type="object" class="oe_highlight" invisible="state in ('delivered', 'cancel', 'qc')"/>
+
+                    <!-- 2. TOMBOL KHUSUS QC -->
+                    <!-- Muncul hanya saat status QC. 
+                        - Tombol 'Input Hasil QC' untuk mengisi detail QC.
+                        - Tombol 'QC Passed / Selesai' (Next Stage) untuk lanjut ke Ready -->
+                    <button name="action_open_qc" string="Input Hasil QC" type="object" class="btn-secondary" invisible="state != 'qc'"/>
+                    <button name="action_next_stage" string="QC Passed / Selesai" type="object" class="oe_highlight" invisible="state != 'qc'"/>
+
+                    <!-- 3. TOMBOL STANDARD LAINNYA -->
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('delivered', 'cancel')"/>
+                    <button name="action_draft" string="Set to Draft" type="object" invisible="state != 'cancel'"/>
+
+                    <!-- Status Bar -->
+                   <field name="workflow_type" invisible="1"/>
+
+                    <!-- SCENARIO 1: FULL SERVICE (CKS) -->
+                    <field name="state" widget="statusbar" statusbar_visible="draft,received,washing,drying,ironing,qc,ready,delivered" invisible="workflow_type != 'full'"/>
+
+                    <!-- SCENARIO 2: CUCI KERING (CK / Carpet) -->
+                    <field name="state" widget="statusbar" statusbar_visible="draft,received,washing,drying,qc,ready,delivered" invisible="workflow_type != 'wash'"/>
+
+                    <!-- SCENARIO 3: SETRIKA SAJA (Ironing) -->
+                    <field name="state" widget="statusbar" statusbar_visible="draft,received,ironing,qc,ready,delivered" invisible="workflow_type != 'iron'"/>
+                </header>
+                <sheet>
+                    <!-- Smart Button Area (Optional: Jika ingin melihat Invoice yang terbentuk) -->
+                    <!-- <div class="oe_button_box" name="button_box"></div> -->
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="sale_order_id" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <!-- Menampilkan total estimasi waktu hasil compute -->
+                            <field name="total_estimated_hours" widget="float_time"/>
+                        </group>
+
+                        <group>
+                            <field name="date_received"/>
+                            <field name="date_estimated"/>
+                            <field name="date_finished" readonly="1"/>
+                        </group>
                     </group>
 
                     <notebook>
-                        <page string="Laundry Items">
-                            <field name="line_ids">
+                        <!-- TAB 1: LAYANAN UTAMA -->
+                        <page string="Layanan Laundry">
+                            <field name="line_laundry_ids">
                                 <list editable="bottom">
-                                    <field name="product_id"/>
-                                    <field name="uom_id" string="Satuan"/>
+                                    <field name="product_id" domain="[('is_laundry_service', '=', True)]"/>
+                                    <field name="laundry_service_type" optional="show"/> 
                                     <field name="quantity"/>
+                                    <field name="uom_id"/>
+                                    <field name="price_unit"/>
+                                    <field name="subtotal" readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- TAB 2: PRODUK TAMBAHAN -->
+                        <page string="Produk Tambahan">
+                            <field name="line_additional_ids">
+                                <list editable="bottom">
+                                    <field name="product_id" domain="[('is_laundry_service', '=', False)]"/>
+                                    <field name="quantity"/>
+                                    <field name="uom_id"/>
                                     <field name="price_unit"/>
                                     <field name="subtotal" readonly="1"/>
                                 </list>
@@ -76,10 +184,14 @@
                         </page>
                     </notebook>
 
-                    <group>
-                        <field name="total_amount" readonly="1"/>
+                    <group class="oe_subtotal_footer oe_right">
+                        <field name="total_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        <field name="currency_id" invisible="1"/>
                     </group>
                 </sheet>
+                
+                <!-- Chatter untuk Log History (Tracking=True) -->
+                <chatter />
             </form>
         </field>
     </record>
