@@ -16,6 +16,7 @@
         'product',
         'uom',
         'hr',
+        'web',
     ],
     'data': [
         'security/laundry_security.xml',
@@ -25,7 +26,8 @@
         'views/laundry_qc_view.xml',
         'views/laundry_order_view.xml',
         'views/sale_order_view.xml',
-        'views/product_view.xml',
+        # 'views/product_view.xml',
+        'views/product_inherit.xml',
         'views/laundry_menu.xml',
     ],
     'application': True,
