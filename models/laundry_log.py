@@ -5,45 +5,23 @@ from odoo import models, fields, api
 class LaundryOrder(models.Model):
     _inherit = 'laundry.order' 
 
-    # =================================================================================
-    # 1. HELPER FIELD (Wajib ada karena dipakai di View XML)
-    # =================================================================================
     service_summary = fields.Char(string='Ringkasan Layanan', compute='_compute_service_summary', store=True)
-
-    # =================================================================================
-    # 2. LOGGING FIELDS (Hanya Start Date)
-    # User ID dihapus sesuai permintaan agar sesuai dengan View XML 1 line
-    # =================================================================================
-
     date_start_washing = fields.Datetime(string='Mulai Washing', readonly=True)
     duration_washing = fields.Float(compute='_compute_durations', string='Durasi Washing', store=True)
-
     date_start_drying = fields.Datetime(string='Mulai Drying', readonly=True)
     duration_drying = fields.Float(compute='_compute_durations', string='Durasi Drying', store=True)
-
     date_start_ironing = fields.Datetime(string='Mulai Ironing', readonly=True)
     duration_ironing = fields.Float(compute='_compute_durations', string='Durasi Ironing', store=True)
-
     date_start_qc = fields.Datetime(string='Mulai QC', readonly=True)
     duration_qc = fields.Float(compute='_compute_durations', string='Durasi QC', store=True)
-
     total_process_duration = fields.Float(compute='_compute_durations', string='Total Durasi', store=True)
-
-    # =================================================================================
-    # 3. COMPUTE METHODS
-    # =================================================================================
 
     @api.depends('line_laundry_ids', 'category_service')
     def _compute_service_summary(self):
         for rec in self:
-            # Ambil item laundry pertama sebagai referensi
             line = rec.line_laundry_ids[:1]
             if line and line.product_id:
-                # Mengambil label teks dari selection (misal 'cks' -> 'Cuci Kering Setrika')
-                # Kita akses product.template karena field definition ada disana
                 st_label = dict(self.env['product.template'].fields_get(['laundry_service_type'])['laundry_service_type']['selection']).get(line.product_id.laundry_service_type, '')
-                
-                # Format: "Cuci Kering Setrika (Reguler)"
                 cat_label = dict(self._fields['category_service'].selection).get(rec.category_service, rec.category_service)
                 rec.service_summary = f"{st_label} ({cat_label})" if st_label else "-"
             else:
@@ -80,13 +58,11 @@ class LaundryOrder(models.Model):
             rec.total_process_duration = rec.duration_washing + rec.duration_drying + rec.duration_ironing + rec.duration_qc
 
     # =================================================================================
-    # 4. ACTION INTERCEPT
+    # ACTION INTERCEPT
     # =================================================================================
     def _on_state_change(self, next_state):
-        # 1. Panggil logic asli laundry_order.py
         super(LaundryOrder, self)._on_state_change(next_state)
-
-        # 2. Catat Waktu Sekarang (Tanpa User ID)
+       
         now = fields.Datetime.now()
         vals = {}
 
@@ -98,7 +74,6 @@ class LaundryOrder(models.Model):
             vals = {'date_start_ironing': now}
         elif next_state == 'qc':
             vals = {'date_start_qc': now}
-        
-        # 3. Simpan
+
         if vals:
             self.write(vals)
