@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- 1. VIEW KHUSUS: LOG PENGERJAAN (LIST / list) -->
+    <record id="view_laundry_order_log_list" model="ir.ui.view">
+        <field name="name">laundry.order.log.list</field>
+        <field name="model">laundry.order</field>
+        <field name="arch" type="xml">
+            <!-- create="0" agar user tidak membuat order dari menu laporan ini -->
+            <list string="Log Pengerjaan" create="0" edit="0" delete="0" 
+                  decoration-info="state == 'washing'" 
+                  decoration-warning="state == 'drying'"
+                  decoration-danger="state == 'ironing'">
+                
+                <!-- IDENTITAS -->
+                <field name="name" string="Order No" decoration-bf="1"/>
+                <field name="service_summary" string="Layanan"/>
+                
+                <!-- STEP 1: WASHING -->
+                <!-- date_start saya set optional="hide" (bisa dimunculkan user jika butuh), default hanya durasi -->
+                <field name="date_start_washing" optional="hide" string="Mulai Wash"/>
+                <field name="duration_washing" widget="float_time" string="Wash (Jam)" 
+                       decoration-bf="1" decoration-muted="duration_washing == 0"/>
+
+                <!-- STEP 2: DRYING -->
+                <field name="date_start_drying" optional="hide" string="Mulai Dry"/>
+                <field name="duration_drying" widget="float_time" string="Dry (Jam)" 
+                       decoration-bf="1" decoration-muted="duration_drying == 0"/>
+
+                <!-- STEP 3: IRONING -->
+                <field name="date_start_ironing" optional="hide" string="Mulai Iron"/>
+                <field name="duration_ironing" widget="float_time" string="Iron (Jam)" 
+                       decoration-bf="1" decoration-muted="duration_ironing == 0"/>
+
+                <!-- STEP 4: QC -->
+                <field name="date_start_qc" optional="hide" string="Mulai QC"/>
+                <field name="duration_qc" widget="float_time" string="QC (Jam)" 
+                       decoration-muted="duration_qc == 0"/>
+
+                <!-- TOTAL & STATUS -->
+                <field name="total_process_duration" string="Total Durasi" widget="float_time" 
+                       decoration-bf="1"/>
+                
+                <field name="state" widget="badge" 
+                       decoration-success="state=='delivered'" 
+                       decoration-info="state=='ready'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- 2. SEARCH VIEW KHUSUS LOG -->
+    <record id="view_laundry_log_search" model="ir.ui.view">
+        <field name="name">laundry.log.search</field>
+        <field name="model">laundry.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="service_summary"/>
+                
+                <!-- Filter Cepat -->
+                <filter string="Proses Hari Ini" name="today_process" 
+                        domain="['|', '|', ('date_start_washing', '&gt;=', context_today().strftime('%Y-%m-%d')), 
+                                      ('date_start_ironing', '&gt;=', context_today().strftime('%Y-%m-%d')),
+                                      ('date_start_qc', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                
+                <filter string="Durasi Lama (> 3 Jam)" name="long_duration" domain="[('total_process_duration', '&gt;', 3.0)]"/>
+
+                <group string="Group By">
+                    <filter string="Status" name="grp_state" context="{'group_by': 'state'}"/>
+                    <filter string="Layanan" name="grp_service" context="{'group_by': 'service_summary'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- 3. ACTION & MENU -->
+    <record id="action_laundry_log_analysis" model="ir.actions.act_window">
+        <field name="name">Laporan Durasi Pengerjaan</field>
+        <field name="res_model">laundry.order</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="view_id" ref="view_laundry_order_log_list"/>
+        <field name="search_view_id" ref="view_laundry_log_search"/>
+        
+        <!-- Filter 1: Hanya tampilkan yang bukan Draft & Cancel (Ini Biarkan Saja) -->
+        <field name="domain">[('state', 'not in', ['draft', 'cancel'])]</field>
+        <!-- <field name="context">{'search_default_today_process': 1}</field> -->
+        <field name="context">{}</field> 
+    </record>
+    
+    <!-- Menu -->
+    <menuitem id="menu_laundry_log_analysis" name="Log Pengerjaan" parent="menu_laundry_operation" action="action_laundry_log_analysis" sequence="5"/>
+
+</odoo>
