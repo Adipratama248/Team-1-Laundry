@@ -20,12 +20,16 @@
     ],
     'data': [
         'security/laundry_security.xml',
+        'security/rules.xml',
         'security/ir.model.access.csv',
+
         'data/laundry_sequence.xml',
+        
         'views/laundry_process_view.xml',
         'views/laundry_qc_view.xml',
         'views/laundry_order_view.xml',
         'views/sale_order_view.xml',
+        'wizard/laundry_assign_operator.xml',
         # 'views/product_view.xml',
         'views/product_inherit.xml',
         'views/laundry_log.xml',

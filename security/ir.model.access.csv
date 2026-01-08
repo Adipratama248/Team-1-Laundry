@@ -24,3 +24,8 @@ access_womp_system,laundry.womp system,model_laundry_womp,base.group_system,1,1,
 access_wizard_admin,laundry.process.wizard admin,model_laundry_process_wizard,group_laundry_admin,1,1,1,1
 access_wizard_system,laundry.process.wizard system,model_laundry_process_wizard,base.group_system,1,1,1,1
 access_wizard_operator,laundry.process.wizard operator,model_laundry_process_wizard,group_laundry_operator,1,1,0,0
+
+access_assign_operator_admin,laundry.assign.operator admin,model_laundry_assign_operator,group_laundry_admin,1,1,1,1
+access_assign_operator_system,laundry.assign.operator system,model_laundry_assign_operator,base.group_system,1,1,1,1
+access_assign_operator_cashier,laundry.assign.operator cashier,model_laundry_assign_operator,group_laundry_cashier,1,1,1,1
+access_assign_operator_operator,laundry.assign.operator operator,model_laundry_assign_operator,group_laundry_operator,1,1,1,1
