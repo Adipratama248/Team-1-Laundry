@@ -4,104 +4,164 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 from datetime import timedelta
 
+
 class LaundryOrder(models.Model):
-    _name = 'laundry.order'
-    _description = 'Laundry Order'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'id desc'
+    _name = "laundry.order"
+    _description = "Laundry Order"
+    _inherit = ["mail.thread", "mail.activity.mixin"]
+    _order = "id desc"
 
     # --- Header Fields ---
-    name = fields.Char(string='Laundry Order', required=True, copy=False, readonly=True, default='New')
-    partner_id = fields.Many2one('res.partner', string='Customer', required=True, tracking=True)
-    sale_order_id = fields.Many2one('sale.order', string='Sales Order', readonly=True)
-    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company, required=True)
-    
-    # --- Date Fields ---
-    date_received = fields.Datetime(string='Date Received', default=fields.Datetime.now, required=True, tracking=True)
-    date_estimated = fields.Datetime(string='Estimated Finish', compute='_compute_date_estimated', store=True, readonly=False)
-    date_finished = fields.Datetime(string='Finished Date', readonly=True, tracking=True)
-    
-    # --- Detail Info ---
-    weight_kg = fields.Float(string='Weight (KG)', digits=(12, 2), tracking=True)
-    qty_pcs = fields.Integer(string='Quantity (Pcs)', tracking=True)
-    note = fields.Text(string='Notes')
-    
-    # Kategori Layanan (Logic Compute Dipertahankan)
-    category_service = fields.Selection([
-        ('reguler', 'Reguler'), 
-        ('express', 'Express')
-    ], string='Kategori Layanan', compute='_compute_category_service', store=True)
+    name = fields.Char(
+        string="Laundry Order", required=True, copy=False, readonly=True, default="New"
+    )
+    partner_id = fields.Many2one(
+        "res.partner", string="Customer", required=True, tracking=True
+    )
+    sale_order_id = fields.Many2one("sale.order", string="Sales Order", readonly=True)
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        default=lambda self: self.env.company,
+        required=True,
+    )
 
-    @api.depends('order_line_ids.product_id.category_service') # Update depends ke master field
+    # --- Date Fields ---
+    date_received = fields.Datetime(
+        string="Date Received",
+        default=fields.Datetime.now,
+        required=True,
+        tracking=True,
+    )
+    date_estimated = fields.Datetime(
+        string="Estimated Finish",
+        compute="_compute_date_estimated",
+        store=True,
+        readonly=False,
+    )
+    date_finished = fields.Datetime(
+        string="Finished Date", readonly=True, tracking=True
+    )
+
+    # --- Detail Info ---
+    weight_kg = fields.Float(string="Weight (KG)", digits=(12, 2), tracking=True)
+    qty_pcs = fields.Integer(string="Quantity (Pcs)", tracking=True)
+    note = fields.Text(string="Notes")
+
+    # Kategori Layanan (Logic Compute Dipertahankan)
+    category_service = fields.Selection(
+        [("reguler", "Reguler"), ("express", "Express")],
+        string="Kategori Layanan",
+        compute="_compute_category_service",
+        store=True,
+    )
+
+    @api.depends(
+        "order_line_ids.product_id.category_service"
+    )  # Update depends ke master field
     def _compute_category_service(self):
         for rec in self:
             # Cari baris laundry dari master field
-            laundry_lines = rec.order_line_ids.filtered(lambda l: l.product_id.is_laundry_service)
+            laundry_lines = rec.order_line_ids.filtered(
+                lambda l: l.product_id.is_laundry_service
+            )
             first_line = laundry_lines[:1]
-            
+
             if first_line and first_line.product_id:
                 rec.category_service = first_line.product_id.category_service
             else:
-                rec.category_service = 'reguler'
+                rec.category_service = "reguler"
 
     # --- Workflow State ---
-    state = fields.Selection([
-        ('draft', 'Draft'),
-        ('received', 'Received'),
-        ('washing', 'Washing'),
-        ('drying', 'Drying'),
-        ('ironing', 'Ironing'),
-        ('qc', 'Quality Check'),
-        ('ready', 'Ready'),
-        ('delivered', 'Delivered'),
-        ('cancel', 'Cancelled'),
-    ], string='Status', default='draft', tracking=True, index=True)
+    state = fields.Selection(
+        [
+            ("draft", "Draft"),
+            ("received", "Received"),
+            ("washing", "Washing"),
+            ("drying", "Drying"),
+            ("ironing", "Ironing"),
+            ("qc", "Quality Check"),
+            ("ready", "Ready"),
+            ("delivered", "Delivered"),
+            ("cancel", "Cancelled"),
+        ],
+        string="Status",
+        default="draft",
+        tracking=True,
+        index=True,
+    )
 
     # =================================================================================
     # PERBAIKAN STRUKTUR LINE & TOTAL
     # =================================================================================
-    
+
     # 1. Field Master: Menampung SEMUA baris (Laundry + Tambahan)
     # Gunakan field ini untuk perhitungan Total agar AKURAT.
-    order_line_ids = fields.One2many('laundry.order.line', 'laundry_order_id', string='All Lines')
+    order_line_ids = fields.One2many(
+        "laundry.order.line", "laundry_order_id", string="All Lines"
+    )
 
     # 2. Field Filtered: Hanya untuk Tampilan di UI (View Only Logic)
     # Domain tetap sama agar terpisah di Tab
-    line_laundry_ids = fields.One2many('laundry.order.line', 'laundry_order_id', 
-                                       string='Laundry Items', 
-                                       domain=[('product_id.is_laundry_service', '=', True)])
-                                       
-    line_additional_ids = fields.One2many('laundry.order.line', 'laundry_order_id', 
-                                          string='Produk Tambahan', 
-                                          domain=[('product_id.is_laundry_service', '=', False)])
-    
+    line_laundry_ids = fields.One2many(
+        "laundry.order.line",
+        "laundry_order_id",
+        string="Laundry Items",
+        domain=[("product_id.is_laundry_service", "=", True)],
+    )
+
+    line_additional_ids = fields.One2many(
+        "laundry.order.line",
+        "laundry_order_id",
+        string="Produk Tambahan",
+        domain=[("product_id.is_laundry_service", "=", False)],
+    )
+
     # 3. Compute Total: Sekarang menghitung dari MASTER FIELD
     # Ini mencegah error perhitungan karena filter domain yang telat update saat save
-    total_amount = fields.Monetary(string='Total', compute='_compute_total', currency_field='currency_id', store=True)
-    currency_id = fields.Many2one('res.currency', related='company_id.currency_id', readonly=True)
-    
-    @api.depends('order_line_ids.subtotal')
+    total_amount = fields.Monetary(
+        string="Total",
+        compute="_compute_total",
+        currency_field="currency_id",
+        store=True,
+    )
+    currency_id = fields.Many2one(
+        "res.currency", related="company_id.currency_id", readonly=True
+    )
+
+    @api.depends("order_line_ids.subtotal")
     def _compute_total(self):
         for record in self:
             # Sum semua baris tanpa peduli jenisnya, pasti akurat
-            record.total_amount = sum(record.order_line_ids.mapped('subtotal'))
+            record.total_amount = sum(record.order_line_ids.mapped("subtotal"))
 
     # --- Computation for Estimations ---
-    total_estimated_hours = fields.Float(string='Total Estimasi (Jam)', compute='_compute_total_estimated_hours', store=True)
+    total_estimated_hours = fields.Float(
+        string="Total Estimasi (Jam)",
+        compute="_compute_total_estimated_hours",
+        store=True,
+    )
 
-    @api.depends('order_line_ids.product_id.estimated_hours', 'order_line_ids.quantity')
+    @api.depends("order_line_ids.product_id.estimated_hours", "order_line_ids.quantity")
     def _compute_total_estimated_hours(self):
         for order in self:
             # Hitung hanya yang laundry service
-            laundry_lines = order.order_line_ids.filtered(lambda x: x.product_id.is_laundry_service)
-            total = sum(line.product_id.estimated_hours * line.quantity for line in laundry_lines)
+            laundry_lines = order.order_line_ids.filtered(
+                lambda x: x.product_id.is_laundry_service
+            )
+            total = sum(
+                line.product_id.estimated_hours * line.quantity
+                for line in laundry_lines
+            )
             order.total_estimated_hours = total
 
-    @api.depends('date_received', 'total_estimated_hours')
+    @api.depends("date_received", "total_estimated_hours")
     def _compute_date_estimated(self):
         for order in self:
             if order.date_received and order.total_estimated_hours:
-                order.date_estimated = order.date_received + timedelta(hours=order.total_estimated_hours)
+                order.date_estimated = order.date_received + timedelta(
+                    hours=order.total_estimated_hours
+                )
             elif not order.date_estimated:
                 order.date_estimated = False
 
@@ -110,126 +170,180 @@ class LaundryOrder(models.Model):
     # ---------------------------------------------------------
     @api.model
     def create(self, vals):
-        if vals.get('name', 'New') == 'New':
-            vals['name'] = self.env['ir.sequence'].next_by_code('laundry.order') or 'New'
+        if vals.get("name", "New") == "New":
+            vals["name"] = (
+                self.env["ir.sequence"].next_by_code("laundry.order") or "New"
+            )
         return super().create(vals)
 
-    @api.constrains('weight_kg', 'qty_pcs')
+    def write(self, vals):
+        """Override write to validate state changes require process logs"""
+        if "state" in vals:
+            for rec in self:
+                new_state = vals["state"]
+                # State yang memerlukan process log
+                process_states = ["washing", "drying", "ironing"]
+
+                if new_state in process_states:
+                    # Cek apakah ada process log dengan process_type sesuai
+                    log_exists = self.env["laundry.process.log"].search(
+                        [
+                            ("laundry_order_id", "=", rec.id),
+                            ("process_type", "=", new_state),
+                        ],
+                        limit=1,
+                    )
+
+                    if not log_exists:
+                        raise UserError(
+                            _(
+                                f"Tidak bisa pindah ke state '{new_state}'. "
+                                f"Silakan buat Process Log untuk proses '{new_state}' terlebih dahulu."
+                            )
+                        )
+
+        return super(LaundryOrder, self).write(vals)
+
+    @api.constrains("weight_kg", "qty_pcs")
     def _check_quantity(self):
         for rec in self:
             if rec.weight_kg < 0 or rec.qty_pcs < 0:
-                raise UserError(_('Weight or Quantity cannot be negative!'))
+                raise UserError(_("Weight or Quantity cannot be negative!"))
 
     # ---------------------------------------------------------
     # DYNAMIC WORKFLOW LOGIC
     # ---------------------------------------------------------
     def _get_workflow_states(self):
         self.ensure_one()
-        steps = ['draft', 'received']
+        steps = ["draft", "received"]
         needs_wash = False
         needs_iron = False
 
         # Loop Master Field agar konsisten
         for line in self.order_line_ids:
-            svc_type = line.product_id.laundry_service_type 
-            if svc_type in ['cks', 'ck', 'carpet']:
+            svc_type = line.product_id.laundry_service_type
+            if svc_type in ["cks", "ck", "carpet"]:
                 needs_wash = True
-            if svc_type in ['cks', 'ironing']:
+            if svc_type in ["cks", "ironing"]:
                 needs_iron = True
 
         if needs_wash:
-            steps.append('washing')
-            steps.append('drying')
+            steps.append("washing")
+            steps.append("drying")
         if needs_iron:
-            steps.append('ironing')
+            steps.append("ironing")
 
-        steps.extend(['qc', 'ready', 'delivered'])
+        steps.extend(["qc", "ready", "delivered"])
         return steps
 
     def action_next_stage(self):
         for rec in self:
             valid_steps = rec._get_workflow_states()
-            if rec.state == 'delivered': continue
-            if rec.state == 'cancel': raise UserError(_("Order Cancelled, cannot process."))
+            if rec.state == "delivered":
+                continue
+            if rec.state == "cancel":
+                raise UserError(_("Order Cancelled, cannot process."))
 
             try:
                 current_idx = valid_steps.index(rec.state)
                 if current_idx < len(valid_steps) - 1:
                     next_state = valid_steps[current_idx + 1]
                     rec._on_state_change(next_state)
-                    rec.write({'state': next_state})
+                    rec.write({"state": next_state})
             except ValueError:
-                raise UserError(_(f"Status '{rec.state}' tidak valid untuk alur layanan produk ini."))
+                raise UserError(
+                    _(
+                        f"Status '{rec.state}' tidak valid untuk alur layanan produk ini."
+                    )
+                )
 
     def _on_state_change(self, next_state):
-        if next_state == 'qc':
+        if next_state == "qc":
             self._create_or_get_qc()
-        elif next_state == 'ready':
+        elif next_state == "ready":
             self.date_finished = fields.Datetime.now()
-        elif next_state == 'delivered':
+        elif next_state == "delivered":
             self._create_invoice()
 
     # ---------------------------------------------------------
     # HELPER ACTIONS
     # ---------------------------------------------------------
     def _create_or_get_qc(self):
-        qc_obj = self.env['laundry.qc']
-        if not qc_obj.search([('laundry_order_id', '=', self.id)], limit=1):
-            qc_obj.create({'laundry_order_id': self.id})
+        qc_obj = self.env["laundry.qc"]
+        if not qc_obj.search([("laundry_order_id", "=", self.id)], limit=1):
+            qc_obj.create({"laundry_order_id": self.id})
 
     def _create_invoice(self):
-        if self.total_amount <= 0: return
+        if self.total_amount <= 0:
+            return
 
-        journal = self.env['account.journal'].search([('type', '=', 'sale'), ('company_id', '=', self.company_id.id)], limit=1)
+        journal = self.env["account.journal"].search(
+            [("type", "=", "sale"), ("company_id", "=", self.company_id.id)], limit=1
+        )
         if not journal:
             raise UserError(_("Please define a Sale Journal for this company."))
 
         invoice_lines = []
         # Loop Master Field
         for line in self.order_line_ids:
-            invoice_lines.append((0, 0, {
-                'product_id': line.product_id.id,
-                'quantity': line.quantity,
-                'price_unit': line.price_unit,
-                'name': line.product_id.name,
-                'tax_ids': [(6, 0, line.product_id.taxes_id.ids)],
-            }))
+            invoice_lines.append(
+                (
+                    0,
+                    0,
+                    {
+                        "product_id": line.product_id.id,
+                        "quantity": line.quantity,
+                        "price_unit": line.price_unit,
+                        "name": line.product_id.name,
+                        "tax_ids": [(6, 0, line.product_id.taxes_id.ids)],
+                    },
+                )
+            )
 
         invoice_vals = {
-            'partner_id': self.partner_id.id,
-            'move_type': 'out_invoice',
-            'invoice_date': fields.Date.today(),
-            'journal_id': journal.id,
-            'invoice_line_ids': invoice_lines,
+            "partner_id": self.partner_id.id,
+            "move_type": "out_invoice",
+            "invoice_date": fields.Date.today(),
+            "journal_id": journal.id,
+            "invoice_line_ids": invoice_lines,
         }
-        self.env['account.move'].create(invoice_vals)
+        self.env["account.move"].create(invoice_vals)
 
-    def action_cancel(self): self.write({'state': 'cancel'})
-    def action_draft(self): self.write({'state': 'draft'})
+    def action_cancel(self):
+        self.write({"state": "cancel"})
+
+    def action_draft(self):
+        self.write({"state": "draft"})
 
     def action_open_qc(self):
         self.ensure_one()
-        qc = self.env['laundry.qc'].search([('laundry_order_id', '=', self.id)], limit=1)
+        qc = self.env["laundry.qc"].search(
+            [("laundry_order_id", "=", self.id)], limit=1
+        )
         if qc:
             return {
-                'type': 'ir.actions.act_window',
-                'name': 'Quality Check',
-                'res_model': 'laundry.qc',
-                'view_mode': 'form',
-                'res_id': qc.id,
+                "type": "ir.actions.act_window",
+                "name": "Quality Check",
+                "res_model": "laundry.qc",
+                "view_mode": "form",
+                "res_id": qc.id,
             }
         return False
-    
+
     # ---------------------------------------------------------
     # WORKFLOW TYPE (BARU)
     # ---------------------------------------------------------
-    workflow_type = fields.Selection([
-        ('full', 'Lengkap (CKS)'),
-        ('wash', 'Cuci Kering (CK)'),
-        ('iron', 'Setrika (Ironing)'),
-    ], string='Workflow Type', compute='_compute_workflow_type')
+    workflow_type = fields.Selection(
+        [
+            ("full", "Lengkap (CKS)"),
+            ("wash", "Cuci Kering (CK)"),
+            ("iron", "Setrika (Ironing)"),
+        ],
+        string="Workflow Type",
+        compute="_compute_workflow_type",
+    )
 
-    @api.depends('order_line_ids.product_id')
+    @api.depends("order_line_ids.product_id")
     def _compute_workflow_type(self):
         for rec in self:
             needs_wash = False
@@ -237,12 +351,16 @@ class LaundryOrder(models.Model):
             # Loop Master Field
             for line in rec.order_line_ids:
                 st = line.product_id.laundry_service_type
-                if st in ['cks', 'ck', 'carpet']:
+                if st in ["cks", "ck", "carpet"]:
                     needs_wash = True
-                if st in ['cks', 'ironing']:
+                if st in ["cks", "ironing"]:
                     needs_iron = True
-            
-            if needs_wash and needs_iron: rec.workflow_type = 'full'
-            elif needs_wash: rec.workflow_type = 'wash'
-            elif needs_iron: rec.workflow_type = 'iron'
-            else: rec.workflow_type = 'full'
+
+            if needs_wash and needs_iron:
+                rec.workflow_type = "full"
+            elif needs_wash:
+                rec.workflow_type = "wash"
+            elif needs_iron:
+                rec.workflow_type = "iron"
+            else:
+                rec.workflow_type = "full"
