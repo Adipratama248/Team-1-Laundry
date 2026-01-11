@@ -6,6 +6,7 @@ class LaundryOrder(models.Model):
     _inherit = 'laundry.order' 
 
     service_summary = fields.Char(string='Ringkasan Layanan', compute='_compute_service_summary', store=True)
+    date_process_start = fields.Datetime(string='Mulai Proses', readonly=True)
     date_start_washing = fields.Datetime(string='Mulai Washing', readonly=True)
     duration_washing = fields.Float(compute='_compute_durations', string='Durasi Washing', store=True)
     date_start_drying = fields.Datetime(string='Mulai Drying', readonly=True)
@@ -66,14 +67,18 @@ class LaundryOrder(models.Model):
         now = fields.Datetime.now()
         vals = {}
 
+        # Capture Start Time (First Process)
+        if next_state in ['washing', 'drying', 'ironing'] and not self.date_process_start:
+            vals['date_process_start'] = now
+
         if next_state == 'washing':
-            vals = {'date_start_washing': now}
+            vals.update({'date_start_washing': now})
         elif next_state == 'drying':
-            vals = {'date_start_drying': now}
+            vals.update({'date_start_drying': now})
         elif next_state == 'ironing':
-            vals = {'date_start_ironing': now}
+            vals.update({'date_start_ironing': now})
         elif next_state == 'qc':
-            vals = {'date_start_qc': now}
+            vals.update({'date_start_qc': now})
 
         if vals:
             self.write(vals)

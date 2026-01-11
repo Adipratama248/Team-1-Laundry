@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- list VIEW -->
+    <!-- LIST VIEW -->
     <record id="view_laundry_order_list" model="ir.ui.view">
         <field name="name">laundry.order.list</field>
         <field name="model">laundry.order</field>
         <field name="type">list</field>
         <field name="arch" type="xml">
-            <list>
+            <list decoration-info="state == 'draft'" decoration-success="state == 'delivered'" decoration-warning="state == 'qc'">
                 <field name="name"/>
                 <field name="partner_id"/>
+                <field name="operator_id" widget="many2one_avatar_employee"/>
                 <field name="date_received"/>
-                <field name="date_estimated"/>
-                <field name="weight_kg"/>
-                <field name="qty_pcs"/>
-                <field name="state"/>
-                <field name="total_amount"/>
+                <field name="date_estimated" widget="remaining_days"/>
+                <field name="weight_kg" optional="hide"/>
+                <field name="qty_pcs" optional="hide"/>
+                <field name="total_amount" widget="monetary"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="state" widget="badge" decoration-success="state == 'delivered'" decoration-warning="state in ('washing','drying','ironing')"/>
             </list>
         </field>
     </record>
 
+    <!-- FORM VIEW -->
     <record id="view_laundry_order_form" model="ir.ui.view">
         <field name="name">laundry.order.form</field>
         <field name="model">laundry.order</field>
@@ -27,38 +30,27 @@
         <field name="arch" type="xml">
             <form string="Laundry Order">
                 <header>
-                    <!-- 1. TOMBOL UTAMA FLOW (DINAMIS) -->
-                    <!-- Tombol ini akan memanggil fungsi action_next_stage di Python
-                        yang secara cerdas melompati status yang tidak perlu (misal: skip washing jika cuma setrika) -->
-                    <button name="action_next_stage" string="Proses Selanjutnya" type="object" class="oe_highlight" invisible="state in ('delivered', 'cancel', 'qc')"/>
+                    <button name="action_confirm" string="Confirm Order" type="object" class="oe_highlight" invisible="not id or state != 'draft'" groups="laundry.group_laundry_admin,laundry.group_laundry_cashier"/> <!-- Draft -> Received + Wizard -->
+                    <button name="action_next_stage" string="Start Job" type="object" class="oe_highlight" invisible="state != 'received'" groups="laundry.group_laundry_operator"/> <!-- Received -> Washing/Ironing -->
+                    <button name="action_next_stage" string="Next Step" type="object" class="oe_highlight" invisible="state not in ('washing', 'drying', 'ironing')" groups="laundry.group_laundry_operator"/> <!-- Washing/Drying/Ironing -> Next -->
+                    <button name="action_open_qc" string="Input Hasil QC" type="object" class="btn-secondary" invisible="state != 'qc'" groups="laundry.group_laundry_operator"/>  <!-- QC -> Ready -->
+                    <button name="action_next_stage" string="QC Passed / Finish" type="object" class="oe_highlight" invisible="state != 'qc'" groups="laundry.group_laundry_operator"/>
+                    <button name="action_next_stage" string="Delivered" type="object" class="btn-success" invisible="state != 'ready'" groups="laundry.group_laundry_operator"/> <!-- Ready -> Delivered -->
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state != 'draft'" groups="laundry.group_laundry_admin,laundry.group_laundry_cashier"/>
+                    <button name="action_draft" string="Set to Draft" type="object" invisible="state != 'cancel'" groups="laundry.group_laundry_admin,laundry.group_laundry_cashier"/>
 
-                    <!-- 2. TOMBOL KHUSUS QC -->
-                    <!-- Muncul hanya saat status QC. 
-                        - Tombol 'Input Hasil QC' untuk mengisi detail QC.
-                        - Tombol 'QC Passed / Selesai' (Next Stage) untuk lanjut ke Ready -->
-                    <button name="action_open_qc" string="Input Hasil QC" type="object" class="btn-secondary" invisible="state != 'qc'"/>
-                    <button name="action_next_stage" string="QC Passed / Selesai" type="object" class="oe_highlight" invisible="state != 'qc'"/>
+                    <!-- Invoice & Tag -->
+                    <button name="action_generate_invoice" string="Create Invoice" type="object" class="btn-secondary" invisible="invoice_id or state in ('draft', 'cancel')" groups="laundry.group_laundry_admin,laundry.group_laundry_cashier"/>
+                    <button name="action_register_payment" string="Bayar" type="object" class="btn-primary" groups="laundry.group_laundry_cashier,laundry.group_laundry_admin" invisible="not invoice_id or state in ('draft', 'cancel') or status_pembayaran == 'paid'"/>
+                    <button name="action_print_laundry_tag" string="Print Tag" type="object" class="btn-secondary" invisible="state == 'draft' or state == 'cancel'"/>
 
-                    <!-- 3. TOMBOL STANDARD LAINNYA -->
-                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('delivered', 'cancel')"/>
-                    <button name="action_draft" string="Set to Draft" type="object" invisible="state != 'cancel'"/>
-
-                    <!-- Status Bar -->
-                   <field name="workflow_type" invisible="1"/>
-
-                    <!-- SCENARIO 1: FULL SERVICE (CKS) -->
+                    <!-- STATUSBAR -->
+                    <field name="workflow_type" invisible="1"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,received,washing,drying,ironing,qc,ready,delivered" invisible="workflow_type != 'full'"/>
-
-                    <!-- SCENARIO 2: CUCI KERING (CK / Carpet) -->
                     <field name="state" widget="statusbar" statusbar_visible="draft,received,washing,drying,qc,ready,delivered" invisible="workflow_type != 'wash'"/>
-
-                    <!-- SCENARIO 3: SETRIKA SAJA (Ironing) -->
                     <field name="state" widget="statusbar" statusbar_visible="draft,received,ironing,qc,ready,delivered" invisible="workflow_type != 'iron'"/>
                 </header>
                 <sheet>
-                    <!-- Smart Button Area (Optional: Jika ingin melihat Invoice yang terbentuk) -->
-                    <!-- <div class="oe_button_box" name="button_box"></div> -->
-
                     <div class="oe_title">
                         <h1>
                             <field name="name"/>
@@ -67,29 +59,35 @@
 
                     <group>
                         <group>
-                            <field name="partner_id"/>
+                            <field name="partner_id" readonly="state != 'draft'" widget="res_partner_many2one_context"/>
+                            <field name="operator_id" options="{'no_create': True, 'no_open': True}" readonly="state not in ('draft', 'received')"/>
                             <field name="sale_order_id" readonly="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
-                            <!-- Menampilkan total estimasi waktu hasil compute -->
-                            <field name="total_estimated_hours" widget="float_time"/>
+                            <field name="total_estimated_hours" widget="float_time" force_save="1"/>
+                            <field name="invoice_id" invisible="1"/>
                         </group>
 
                         <group>
                             <field name="date_received"/>
-                            <field name="date_estimated"/>
+                            <field name="date_estimated" force_save="1"/>
                             <field name="date_finished" readonly="1"/>
+                            <field name="status_pembayaran" widget="badge"
+                                   decoration-info="status_pembayaran == 'draft'"
+                                   decoration-danger="status_pembayaran == 'not_paid'"
+                                   decoration-warning="status_pembayaran in ('partial', 'in_payment')"
+                                   decoration-success="status_pembayaran in ('paid', 'reversed')" />
                         </group>
                     </group>
 
                     <notebook>
                         <!-- TAB 1: LAYANAN UTAMA -->
                         <page string="Layanan Laundry">
-                            <field name="line_laundry_ids">
+                            <field name="line_laundry_ids" readonly="state != 'draft'">
                                 <list editable="bottom">
                                     <field name="product_id" domain="[('is_laundry_service', '=', True)]"/>
                                     <field name="laundry_service_type" optional="show"/> 
                                     <field name="quantity"/>
-                                    <field name="uom_id"/>
+                                    <field name="uom_id" readonly="1" force_save="1"/>
                                     <field name="price_unit"/>
                                     <field name="subtotal" readonly="1"/>
                                 </list>
@@ -98,11 +96,11 @@
 
                         <!-- TAB 2: PRODUK TAMBAHAN -->
                         <page string="Produk Tambahan">
-                            <field name="line_additional_ids">
+                            <field name="line_additional_ids" readonly="state != 'draft'">
                                 <list editable="bottom">
                                     <field name="product_id" domain="[('is_laundry_service', '=', False)]"/>
                                     <field name="quantity"/>
-                                    <field name="uom_id"/>
+                                    <field name="uom_id" readonly="1" force_save="1"/>
                                     <field name="price_unit"/>
                                     <field name="subtotal" readonly="1"/>
                                 </list>
@@ -119,8 +117,6 @@
                         <field name="currency_id" invisible="1"/>
                     </group>
                 </sheet>
-                
-                <!-- Chatter untuk Log History (Tracking=True) -->
                 <chatter />
             </form>
         </field>
@@ -135,6 +131,7 @@
             <search>
                 <field name="name"/>
                 <field name="partner_id"/>
+                <field name="operator_id"/>
                 <filter name="filter_today" string="Today"
                         domain="[('date_received','>=',context_today())]"/>
                 <filter name="filter_not_finished" string="Not Finished"
@@ -142,6 +139,7 @@
                 <group expand="0" string="Group By">
                     <filter name="groupby_state" string="Status" domain="[]" context="{'group_by':'state'}"/>
                     <filter name="groupby_partner" string="Customer" domain="[]" context="{'group_by':'partner_id'}"/>
+                    <filter name="groupby_operator" string="Operator" domain="[]" context="{'group_by':'operator_id'}"/>
                 </group>
             </search>
         </field>
@@ -153,6 +151,11 @@
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">laundry.order</field>
         <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Buat pesanan laundry baru
+          </p>
+        </field>
     </record>
 
 </odoo>
