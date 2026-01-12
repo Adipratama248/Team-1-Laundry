@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_laundry_condition_form" model="ir.ui.view">
+        <field name="name">laundry.condition.form</field>
+        <field name="model">laundry.condition</field>
+        <field name="arch" type="xml">
+            <form string="Cek Kondisi Barang">
+                <group>
+                    <group string="Kerusakan Fisik">
+                        <field name="is_torn"/>
+                        <field name="torn_note" invisible="not is_torn" placeholder="Lokasi..."/>
+                        <field name="is_button_missing"/>
+                    </group>
+                    <group string="Kondisi Kain">
+                        <field name="is_stain"/>
+                        <field name="stain_type" invisible="not is_stain"/>
+                        <field name="is_faded"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="additional_note" placeholder="Catatan manual..."/>
+                </group>
+                <footer>
+                    <button name="action_save_condition" string="Simpan Catatan" type="object" class="btn-primary"/>
+                    <button string="Batal" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

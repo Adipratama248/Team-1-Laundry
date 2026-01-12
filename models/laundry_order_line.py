@@ -20,9 +20,11 @@ class LaundryOrderLine(models.Model):
     
     uom_id = fields.Many2one('uom.uom', string='Unit', required=True)
     quantity = fields.Float(string='Quantity', default=1.0)
-    price_unit = fields.Float(string='Price')
-    subtotal = fields.Monetary(string='Subtotal', compute='_compute_subtotal', store=True, currency_field='currency_id')
+    price_unit = fields.Float(string='Price', groups="laundry.group_laundry_cashier,laundry.group_laundry_manager")
+    subtotal = fields.Monetary(string='Subtotal', compute='_compute_subtotal', store=True, currency_field='currency_id', groups="laundry.group_laundry_cashier,laundry.group_laundry_manager")
     currency_id = fields.Many2one('res.currency', related='laundry_order_id.currency_id', readonly=True)
+    note_in = fields.Char(string='Kondisi Awal (Cacat/Noda)', help="Catat jika ada noda, sobek, atau luntur sebelum dicuci.")
+    note_out = fields.Char(string='Kondisi Akhir (QC Note)', help="Catat hasil setelah proses (misal: Noda membandel tidak hilang).")
     
     # (OPTIONAL) LINK KE SALES ORDER LINE
     sale_line_id = fields.Many2one('sale.order.line', string='Sales Order Line')

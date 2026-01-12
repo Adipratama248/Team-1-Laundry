@@ -27,9 +27,20 @@
             <form string="Laundry QC">
                 <sheet>
                     <group>
-                        <field name="laundry_order_id"/>
-                        <field name="approved_date"/>
-                        <field name="approved_by"/>
+                        <group string="Basic Info">
+                            <field name="laundry_order_id"/>
+                            <field name="approved_date"/>
+                            <field name="approved_by"/>
+                        </group>
+                        <group string="Checklist">
+                            <field name="clean_check" readonly="1"/>
+                            <field name="dry_check" readonly="1"/>
+                            <field name="iron_check" readonly="1"/>
+                            <field name="perfume_check" readonly="1"/>
+                            <field name="qty_check" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Conditions &amp; Notes">
                         <field name="condition_before"/>
                         <field name="condition_after"/>
                         <field name="note"/>
