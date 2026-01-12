@@ -17,23 +17,33 @@
         'uom',
         'hr',
         'web',
+        'purchase', 
+        'contacts',
     ],
+
     'data': [
-        'security/laundry_security.xml',
+        'security/groups.xml',
         'security/rules.xml',
+        # 'security/menu_restriction.xml',
         'security/ir.model.access.csv',
+
+        'wizard/laundry_assign_operator.xml',
+        'wizard/laundry_order_qc_wizard.xml',
+        'wizard/laundry_condition.xml',
 
         'data/laundry_sequence.xml',
         
-        'views/laundry_process_view.xml',
         'views/laundry_qc_view.xml',
         'views/laundry_order_view.xml',
         'views/sale_order_view.xml',
-        'wizard/laundry_assign_operator.xml',
         # 'views/product_view.xml',
         'views/product_inherit.xml',
         'views/laundry_log.xml',
         'views/laundry_menu.xml',
+
+        'report/report_action.xml',
+        'report/report_laundry_tag.xml',
+
     ],  
     'application': True,
     'installable': True,

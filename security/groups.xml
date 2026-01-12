@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <!-- 1. KATEGORI APLIKASI -->
+        <record id="module_category_laundry" model="ir.module.category">
+            <field name="name">Laundry Management</field>
+            <field name="description">Akses level untuk aplikasi Laundry</field>
+            <field name="parent_id" ref="base.module_category_extra"/>
+            <field name="sequence">50</field>
+        </record>
+
+        <!-- 2. DEFINISI GRUP (ROLE) -->
+
+        <!-- ROLE: OPERATOR (Bagian Cuci/Setrika) -->
+        <!-- Hak: Hanya bisa lihat order & update status pengerjaan. Tidak bisa lihat harga/omset. -->
+        <record id="group_laundry_operator" model="res.groups">
+            <field name="name">Operator (Cuci/Setrika)</field>
+            <field name="category_id" ref="module_category_laundry"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <!-- ROLE: GUDANG (Stok & Produk) -->
+        <!-- Hak: Fokus ke Produk & Stok. Bisa lihat order tapi read-only. -->
+        <record id="group_laundry_stock" model="res.groups">
+            <field name="name">Staff Gudang</field>
+            <field name="category_id" ref="module_category_laundry"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <!-- ROLE: KASIR (Front Office) -->
+        <!-- Hak: Buat Order, Terima Uang, Serah Terima Barang. -->
+        <record id="group_laundry_cashier" model="res.groups">
+            <field name="name">Kasir</field>
+            <field name="category_id" ref="module_category_laundry"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <!-- ROLE: OWNER (Pemilik) -->
+        <!-- Hak: Melihat Laporan & Semua Data (Read Only). Tidak operasional. -->
+        <record id="group_laundry_owner" model="res.groups">
+            <field name="name">Owner (Pemilik)</field>
+            <field name="category_id" ref="module_category_laundry"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <!-- ROLE: ADMINISTRATOR (Manager) -->
+        <!-- Hak: Full Akses (Hapus data, Konfigurasi, dll) -->
+        <record id="group_laundry_manager" model="res.groups">
+            <field name="name">Administrator</field>
+            <field name="category_id" ref="module_category_laundry"/>
+            <field name="implied_ids" eval="[(4, ref('group_laundry_cashier'))]"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+
+    </data>
+</odoo>

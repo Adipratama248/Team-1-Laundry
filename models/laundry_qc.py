@@ -15,28 +15,13 @@ class LaundryQC(models.Model):
     condition_before = fields.Text(string="Condition Before")
     condition_after = fields.Text(string="Condition After")
 
-    approved_by = fields.Many2one("hr.employee", string="Approved By", required=True)
-    approved_date = fields.Datetime(string="Approved Date", default=fields.Datetime.now)
-    note = fields.Text(string="QC Notes")
+    # Checklist Fields
+    clean_check = fields.Boolean(string='Clean / No Stains', default=False)
+    dry_check = fields.Boolean(string='Properly Dried', default=False)
+    iron_check = fields.Boolean(string='Neatly Ironed', default=False)
+    perfume_check = fields.Boolean(string='Scent Applied', default=False)
+    qty_check = fields.Boolean(string='Quantity Matches', default=False)
 
-    @api.model
-    def create(self, vals):
-        """Auto-update order state to 'ready' when QC is created"""
-        result = super(LaundryQC, self).create(vals)
-        result._update_order_to_ready()
-        return result
-
-    def write(self, vals):
-        """Auto-update order state to 'ready' when QC is updated"""
-        result = super(LaundryQC, self).write(vals)
-        # Update state if approved_by or approved_date is set
-        if "approved_by" in vals or "approved_date" in vals:
-            self._update_order_to_ready()
-        return result
-
-    def _update_order_to_ready(self):
-        """Update related laundry order state to 'ready' after QC"""
-        for rec in self:
-            if rec.laundry_order_id:
-                # Use sudo to bypass access rights if needed
-                rec.laundry_order_id.sudo().write({"state": "ready"})
+    approved_by = fields.Many2one('hr.employee', string='Approved By')
+    approved_date = fields.Datetime(string='Approved Date', default=fields.Datetime.now)
+    note = fields.Text(string='QC Notes')
