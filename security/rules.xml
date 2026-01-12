@@ -7,7 +7,7 @@
         <field name="name">Laundry Order: Personal Orders Only</field>
         <field name="model_id" ref="model_laundry_order"/>
         <field name="domain_force">[('operator_id.user_id', '=', user.id)]</field>
-        <field name="groups" eval="[(4, ref('laundry.group_laundry_operator'))]"/>
+        <field name="groups" eval="[(4, ref('Team-1-Laundry.group_laundry_operator'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="1"/>
         <field name="perm_create" eval="0"/>
@@ -19,7 +19,7 @@
         <field name="name">Laundry Order: Manager See All</field>
         <field name="model_id" ref="model_laundry_order"/>
         <field name="domain_force">[(1, '=', 1)]</field>
-        <field name="groups" eval="[(4, ref('laundry.group_laundry_admin')), (4, ref('laundry.group_laundry_cashier'))]"/>
+        <field name="groups" eval="[(4, ref('Team-1-Laundry.group_laundry_admin')), (4, ref('Team-1-Laundry.group_laundry_cashier'))]"/>
     </record>
 
     </data>
