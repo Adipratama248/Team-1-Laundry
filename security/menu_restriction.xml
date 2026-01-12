@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- ========================================================= -->
+        <!-- MENGUNCI MENU MODUL LAIN AGAR CUMA ADMIN YG BISA LIHAT -->
+        <!-- ========================================================= -->
+        
+        <!-- Grup Admin System (User paling sakti) -->
+        <!-- Kita pakai ref('base.group_system') -->
+
+        <!-- 1. HIDE APPS (Aplikasi) -->
+        <record id="base.menu_management" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+
+        <!-- 2. HIDE SETTINGS (Pengaturan) -->
+        <record id="base.menu_administration" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+
+        <!-- 3. HIDE EMPLOYEES (Karyawan - Module hr) -->
+        <record id="hr.menu_hr_root" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+
+        <!-- 4. HIDE INVENTORY (Stok - Module stock) -->
+        <record id="stock.menu_stock_root" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+
+        <!-- 5. HIDE INVOICING / ACCOUNTING (Tagihan - Module account) -->
+        <record id="account.menu_finance" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+
+        <!-- 6. HIDE PURCHASE (Pembelian - Module purchase) -->
+        <record id="purchase.menu_purchase_root" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+
+        <!-- 7. HIDE DISCUSS (Balon Chat - Module mail) -->
+        <record id="mail.menu_root_discuss" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+
+        <!-- 8. HIDE CONTACTS (Kontak - Module contacts) -->
+        <record id="contacts.menu_contacts" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+
+        <!-- 9. HIDE LINK TRACKER (ID yang Benar) -->
+        <record id="utm.menu_link_tracker_root" model="ir.ui.menu">
+             <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+
+    </data>
+</odoo>

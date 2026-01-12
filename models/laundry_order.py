@@ -29,7 +29,36 @@ class LaundryOrder(models.Model):
     weight_kg = fields.Float(string='Weight (KG)', digits=(12, 2), tracking=True)
     qty_pcs = fields.Integer(string='Quantity (Pcs)', tracking=True)
     note = fields.Text(string='Notes')
-    status_pembayaran = fields.Selection(string='Status Pembayaran', related='invoice_id.payment_state', store=True)
+    status_pembayaran = fields.Selection(string='Status Pembayaran', related='invoice_id.payment_state', store=True, groups="laundry.group_laundry_cashier,laundry.group_laundry_manager")
+    delivery_alert = fields.Char(string='Alert', compute='_compute_delivery_alert', groups="laundry.group_laundry_cashier,laundry.group_laundry_manager")
+
+    
+    # New fields for View Logic
+    invoice_payment_state = fields.Selection(related='invoice_id.payment_state', string="Payment Status", store=True)
+    has_active_invoice = fields.Boolean(compute='_compute_has_active_invoice', string="Has Active Invoice")
+
+    hide_operator_buttons = fields.Boolean(compute='_compute_button_visibility')
+    hide_manager_buttons = fields.Boolean(compute='_compute_button_visibility')
+
+    def _compute_button_visibility(self):
+        # Check groups once for the user
+        is_manager = self.env.user.has_group('laundry.group_laundry_manager')
+        is_operator = self.env.user.has_group('laundry.group_laundry_operator')
+        is_cashier = self.env.user.has_group('laundry.group_laundry_cashier')
+        
+        for rec in self:
+            # Hide operator buttons if user is NOT an operator OR if they ARE a manager
+            # Strict segregation: Managers should not do operator tasks.
+            rec.hide_operator_buttons = not is_operator or is_manager
+            
+            # Hide manager/cashier buttons if user is NOT one of those
+            # Cashiers still do Deliver and Payment
+            rec.hide_manager_buttons = not (is_manager or is_cashier)
+
+    @api.depends('invoice_id', 'invoice_id.state')
+    def _compute_has_active_invoice(self):
+        for rec in self:
+            rec.has_active_invoice = bool(rec.invoice_id and rec.invoice_id.state != 'cancel')
     
     # =================================================================================
     # LINE & TOTAL
@@ -43,7 +72,7 @@ class LaundryOrder(models.Model):
     line_additional_ids = fields.One2many('laundry.order.line', 'laundry_order_id', string='Produk Tambahan', domain=[('product_id.is_laundry_service', '=', False)])
     
     # 3. Computations
-    total_amount = fields.Monetary(string='Total', compute='_compute_total', currency_field='currency_id', store=True)
+    total_amount = fields.Monetary(string='Total', compute='_compute_total', currency_field='currency_id', store=True, groups="laundry.group_laundry_cashier,laundry.group_laundry_manager")
     currency_id = fields.Many2one('res.currency', related='company_id.currency_id', readonly=True)
     
     @api.depends('order_line_ids.subtotal')
@@ -106,6 +135,26 @@ class LaundryOrder(models.Model):
         ('cancel', 'Cancelled'),
     ], string='Status', default='draft', tracking=True, index=True)
 
+    state_statusbar = fields.Selection(selection=[
+        ('draft', 'Draft'),
+        ('received', 'Received'),
+        ('washing', 'Washing'),
+        ('drying', 'Drying'),
+        ('ironing', 'Ironing'),
+        ('qc', 'Quality Check'),
+        ('ready', 'Ready'),
+        ('delivered', 'Delivered'),
+        ('cancel', 'Cancelled'),
+    ], string='Status Bar', compute='_compute_state_statusbar')
+
+    @api.depends('state')
+    def _compute_state_statusbar(self):
+        for rec in self:
+            if rec.state == 'delivered':
+                rec.state_statusbar = 'ready'
+            else:
+                rec.state_statusbar = rec.state
+
     # -------------------------------------------------------------------------
     # [LOGIC 1] MENENTUKAN ALUR (WORKFLOW)
     # -------------------------------------------------------------------------
@@ -139,14 +188,21 @@ class LaundryOrder(models.Model):
             if rec.state != 'draft':
                 continue
             
+            # Validation: Ensure there are lines before confirming
+            if not rec.order_line_ids:
+                raise UserError(_("Order Laundry belum memiliki detail item! Tambahkan item terlebih dahulu."))
+
             rec.write({'state': 'received'})
+            
+        # Return the wizard for the first record in self to select operator
+        if self:
             return {
                 'type': 'ir.actions.act_window',
                 'name': 'Pilih Operator',
                 'res_model': 'laundry.assign.operator',
                 'view_mode': 'form',
                 'target': 'new',
-                'context': {'default_order_id': rec.id}
+                'context': {'default_order_id': self[0].id}
             }
 
     # -------------------------------------------------------------------------
@@ -176,6 +232,18 @@ class LaundryOrder(models.Model):
                 if current_idx < len(valid_steps) - 1:
                     next_state = valid_steps[current_idx + 1]
                     
+                    # ========================================================
+                    # VALIDASI PEMBAYARAN
+                    # ========================================================
+                    if next_state == 'delivered':
+                        if rec.status_pembayaran not in ['paid', 'in_payment']:
+                            raise UserError(_(
+                                "GAGAL SERAH TERIMA!\n\n"
+                                "Barang tidak bisa diserahkan (Delivered) karena status pembayaran: %s.\n"
+                                "Mohon lunasi tagihan terlebih dahulu."
+                            ) % (dict(rec._fields['status_pembayaran']._description_selection(rec.env)).get(rec.status_pembayaran) or 'Belum Bayar'))
+                    # ========================================================
+
                     # Log Waktu Jalan Disini
                     rec._on_state_change(next_state)
                     
@@ -183,12 +251,12 @@ class LaundryOrder(models.Model):
             except ValueError:
                 raise UserError(_(f"Status '{rec.state}' tidak valid."))
 
+
     def _on_state_change(self, next_state):
         if next_state == 'qc':
             self._create_or_get_qc()
         elif next_state == 'ready':
             self.date_finished = fields.Datetime.now()
-        # Invoice sudah tidak otomatis di sini
 
     # =================================================================================
     # MANUAL ACTIONS (BUTTON TRIGGERS)
@@ -222,12 +290,12 @@ class LaundryOrder(models.Model):
                     'res_id': existing.id,
                 }
 
-    def action_print_laundry_tag(self):
-        self.ensure_one()
-        return self.env.ref('laundry.action_report_laundry_tag').report_action(self)
+    # def action_print_laundry_tag(self):
+    #     self.ensure_one()
+    #     return self.env.ref('laundry.report_laundry_tag').report_action(self)
 
     # =================================================================================
-    # HELPER INTERNAL LOGIC
+    # INVOICE LOGIC
     # =================================================================================
     
     def _create_invoice_logic(self):
@@ -303,16 +371,14 @@ class LaundryOrder(models.Model):
 
     def action_open_qc(self):
         self.ensure_one()
-        qc = self.env['laundry.qc'].search([('laundry_order_id', '=', self.id)], limit=1)
-        if qc:
-            return {
-                'type': 'ir.actions.act_window',
-                'name': 'Quality Check',
-                'res_model': 'laundry.qc',
-                'view_mode': 'form',
-                'res_id': qc.id,
-            }
-        return False
+        return {
+            'name': _('Quality Control Checklist'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'laundry.order.qc.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_order_id': self.id}
+        }
     
     workflow_type = fields.Selection([
         ('full', 'Lengkap (CKS)'),
@@ -342,7 +408,6 @@ class LaundryOrder(models.Model):
 
     def action_register_payment(self):
         self.ensure_one()
-
         invoices = self.env['account.move'].search([
             ('invoice_origin', '=', self.name),
             ('move_type', '=', 'out_invoice'),
@@ -365,3 +430,21 @@ class LaundryOrder(models.Model):
             'target': 'new',
             'type': 'ir.actions.act_window',
         }
+
+
+    # =================================================================================
+    # DELIVERY ALERT
+    # =================================================================================
+
+    @api.depends('state', 'invoice_payment_state')
+    def _compute_delivery_alert(self):
+        for rec in self:
+            if rec.state == 'ready':
+                # Cek pembayaran juga biar makin informatif
+                if rec.invoice_payment_state == 'paid':
+                    rec.delivery_alert = "✅ SIAP DIAMBIL (LUNAS)"
+                else:
+                    rec.delivery_alert = "⚠️ SIAP - BELUM LUNAS"
+            else:
+                rec.delivery_alert = False # Kosong jika bukan ready
+                

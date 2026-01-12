@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_laundry_order_qc_wizard_form" model="ir.ui.view">
+        <field name="name">laundry.order.qc.wizard.form</field>
+        <field name="model">laundry.order.qc.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Quality Control Checklist">
+                <group string="Mandatory Checks">
+                    <field name="clean_check"/>
+                    <field name="dry_check"/>
+                    <field name="iron_check"/>
+                    <field name="perfume_check"/>
+                    <field name="qty_check"/>
+                </group>
+                <group>
+                    <field name="note" placeholder="Notes..."/>
+                </group>
+                <footer>
+                    <button name="action_confirm_qc" string="Confirm &amp; Set to Ready" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

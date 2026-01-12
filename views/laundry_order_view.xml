@@ -7,7 +7,8 @@
         <field name="model">laundry.order</field>
         <field name="type">list</field>
         <field name="arch" type="xml">
-            <list decoration-info="state == 'draft'" decoration-success="state == 'delivered'" decoration-warning="state == 'qc'">
+            <!-- <list decoration-muted="state == 'draft'" decoration-success="state == 'delivered'" decoration-info="state == 'ready'"> -->
+            <list decoration-bf="state == 'ready'">
                 <field name="name"/>
                 <field name="partner_id"/>
                 <field name="operator_id" widget="many2one_avatar_employee"/>
@@ -17,7 +18,13 @@
                 <field name="qty_pcs" optional="hide"/>
                 <field name="total_amount" widget="monetary"/>
                 <field name="currency_id" column_invisible="True"/>
-                <field name="state" widget="badge" decoration-success="state == 'delivered'" decoration-warning="state in ('washing','drying','ironing')"/>
+                <field name="state" widget="badge" decoration-success="state == 'delivered'" decoration-muted="state in ('washing','drying','ironing','qc')" decoration-info="state == 'ready'"/>
+                <field name="delivery_alert" 
+                    widget="badge" 
+                    decoration-success="delivery_alert == '✅ SIAP DIAMBIL (LUNAS)'"
+                    decoration-danger="delivery_alert == '⚠️ SIAP - BELUM LUNAS'"
+                    decoration-bf="1"
+                    optional="show"/>
             </list>
         </field>
     </record>
@@ -30,27 +37,53 @@
         <field name="arch" type="xml">
             <form string="Laundry Order">
                 <header>
-                    <button name="action_confirm" string="Confirm Order" type="object" class="oe_highlight" invisible="not id or state != 'draft'" groups="laundry.group_laundry_admin,laundry.group_laundry_cashier"/> <!-- Draft -> Received + Wizard -->
-                    <button name="action_next_stage" string="Start Job" type="object" class="oe_highlight" invisible="state != 'received'" groups="laundry.group_laundry_operator"/> <!-- Received -> Washing/Ironing -->
-                    <button name="action_next_stage" string="Next Step" type="object" class="oe_highlight" invisible="state not in ('washing', 'drying', 'ironing')" groups="laundry.group_laundry_operator"/> <!-- Washing/Drying/Ironing -> Next -->
-                    <button name="action_open_qc" string="Input Hasil QC" type="object" class="btn-secondary" invisible="state != 'qc'" groups="laundry.group_laundry_operator"/>  <!-- QC -> Ready -->
-                    <button name="action_next_stage" string="QC Passed / Finish" type="object" class="oe_highlight" invisible="state != 'qc'" groups="laundry.group_laundry_operator"/>
-                    <button name="action_next_stage" string="Delivered" type="object" class="btn-success" invisible="state != 'ready'" groups="laundry.group_laundry_operator"/> <!-- Ready -> Delivered -->
-                    <button name="action_cancel" string="Cancel" type="object" invisible="state != 'draft'" groups="laundry.group_laundry_admin,laundry.group_laundry_cashier"/>
-                    <button name="action_draft" string="Set to Draft" type="object" invisible="state != 'cancel'" groups="laundry.group_laundry_admin,laundry.group_laundry_cashier"/>
+                    <!-- ================================================================= -->
+                    <!-- ZONE: ADMIN & KASIR -->
+                    <!-- ================================================================= -->
 
-                    <!-- Invoice & Tag -->
-                    <button name="action_generate_invoice" string="Create Invoice" type="object" class="btn-secondary" invisible="invoice_id or state in ('draft', 'cancel')" groups="laundry.group_laundry_admin,laundry.group_laundry_cashier"/>
-                    <button name="action_register_payment" string="Bayar" type="object" class="btn-primary" groups="laundry.group_laundry_cashier,laundry.group_laundry_admin" invisible="not invoice_id or state in ('draft', 'cancel') or status_pembayaran == 'paid'"/>
-                    <button name="action_print_laundry_tag" string="Print Tag" type="object" class="btn-secondary" invisible="state == 'draft' or state == 'cancel'"/>
+                    <!-- 1. CONFIRM ORDER (Draft -> Received) -->
+                    <button name="action_confirm" string="Confirm Order" type="object" class="oe_highlight" invisible="not id or state != 'draft' or hide_manager_buttons" groups="laundry.group_laundry_cashier,laundry.group_laundry_manager"/>
 
-                    <!-- STATUSBAR -->
+                    <!-- 2. DELIVER (Ready -> Delivered) -->
+                    <!-- Di sini validasi pembayaran akan berjalan -->
+                    <button name="action_next_stage" string="Deliver" type="object" class="btn-success" invisible="state != 'ready' or hide_manager_buttons" groups="laundry.group_laundry_cashier,laundry.group_laundry_manager"/>
+
+                    <!-- 3. INVOICING & PAYMENT -->
+                    <button name="action_generate_invoice" string="Create Invoice" type="object" class="btn-secondary" invisible="invoice_id or state in ('draft', 'cancel') or hide_manager_buttons" groups="laundry.group_laundry_manager,laundry.group_laundry_cashier"/>
+                    <button name="action_register_payment" string="Pay" type="object" class="btn-primary" invisible="not invoice_id or state in ('draft', 'cancel') or status_pembayaran == 'paid' or hide_manager_buttons" groups="laundry.group_laundry_cashier,laundry.group_laundry_manager"/>
+
+                    <!-- ================================================================= -->
+                    <!-- ZONE: OPERATOR -->
+                    <!-- ================================================================= -->
+
+                    <!-- 4. START JOB (Received -> Washing) -->
+                    <!-- Operator klik ini saat mau kerja, Waktu mulai dihitung -->
+                    <button name="action_next_stage" string="Start Job" type="object" class="oe_highlight" invisible="state != 'received' or hide_operator_buttons" groups="laundry.group_laundry_operator"/>
+
+                    <!-- 5. NEXT STAGE (Washing -> Drying -> Ironing) -->
+                    <button name="action_next_stage" string="Next Stage" type="object" class="oe_highlight" invisible="state not in ('washing', 'drying', 'ironing') or hide_operator_buttons" groups="laundry.group_laundry_operator"/>
+
+                    <!-- 6. QC PROCESS (QC -> Ready) - SEKARANG OLEH OPERATOR -->
+                    <button name="action_open_qc" string="Quality Check" type="object" class="oe_highlight" invisible="state != 'qc' or hide_operator_buttons" groups="laundry.group_laundry_operator"/>       
+
+                    <!-- ================================================================= -->
+                    <!-- ZONE: SHARED / ALL -->
+                    <!-- ================================================================= -->
+                    
+                    <!-- Cancel & Draft (Bisa dibatasi ke Admin jika perlu) -->
+                    <!-- <button name="action_cancel" string="Cancel" type="object" invisible="not id or state in ('delivered', 'cancel')"/> -->
+                    <button name="action_draft" string="Set to Draft" type="object" invisible="state != 'cancel'"/>
+
+                    <!-- STATUS BAR -->
                     <field name="workflow_type" invisible="1"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,received,washing,drying,ironing,qc,ready,delivered" invisible="workflow_type != 'full'"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,received,washing,drying,qc,ready,delivered" invisible="workflow_type != 'wash'"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,received,ironing,qc,ready,delivered" invisible="workflow_type != 'iron'"/>
+                    <field name="hide_operator_buttons" invisible="1"/>
+                    <field name="hide_manager_buttons" invisible="1"/>
+                    <field name="state_statusbar" widget="statusbar" statusbar_visible="draft,received,washing,drying,ironing,qc,ready" invisible="workflow_type != 'full'"/>
+                    <field name="state_statusbar" widget="statusbar" statusbar_visible="draft,received,washing,drying,qc,ready" invisible="workflow_type != 'wash'"/>
+                    <field name="state_statusbar" widget="statusbar" statusbar_visible="draft,received,ironing,qc,ready" invisible="workflow_type != 'iron'"/>
                 </header>
                 <sheet>
+                    <widget name="web_ribbon" bg_color="bg-success" text="Delivered" invisible="state != 'delivered'" />
                     <div class="oe_title">
                         <h1>
                             <field name="name"/>
@@ -86,6 +119,8 @@
                                 <list editable="bottom">
                                     <field name="product_id" domain="[('is_laundry_service', '=', True)]"/>
                                     <field name="laundry_service_type" optional="show"/> 
+                                    <field name="note_in" placeholder="Contoh: Kancing lepas, Noda tinta..."/>
+                                    <field name="note_out" optional="hide" readonly="state != 'qc'"/>
                                     <field name="quantity"/>
                                     <field name="uom_id" readonly="1" force_save="1"/>
                                     <field name="price_unit"/>

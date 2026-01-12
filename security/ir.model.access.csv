@@ -1,31 +1,33 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_laundry_order_admin,laundry.order admin,model_laundry_order,group_laundry_admin,1,1,1,1
+access_laundry_order_manager,laundry.order manager,model_laundry_order,group_laundry_manager,1,1,1,1
 access_laundry_order_system,laundry.order system,model_laundry_order,base.group_system,1,1,1,1
-access_laundry_order_cashier,laundry.order cashier,model_laundry_order,group_laundry_cashier,1,0,0,0
+access_laundry_order_cashier,laundry.order cashier,model_laundry_order,group_laundry_cashier,1,1,0,0
 access_laundry_order_operator,laundry.order operator,model_laundry_order,group_laundry_operator,1,1,0,0
-access_laundry_order_qc,laundry.order qc,model_laundry_order,group_laundry_qc,1,1,0,0
+
+access_laundry_order_stock,laundry.order stock,model_laundry_order,group_laundry_stock,1,0,0,0
 access_laundry_order_owner,laundry.order owner,model_laundry_order,group_laundry_owner,1,0,0,0
 
-access_laundry_line_admin,laundry.line admin,model_laundry_order_line,group_laundry_admin,1,1,1,1
+access_laundry_line_manager,laundry.line manager,model_laundry_order_line,group_laundry_manager,1,1,1,1
 access_laundry_line_system,laundry.line system,model_laundry_order_line,base.group_system,1,1,1,1
 access_laundry_line_operator,laundry.line operator,model_laundry_order_line,group_laundry_operator,1,1,0,0
+access_laundry_line_stock,laundry.line stock,model_laundry_order_line,group_laundry_stock,1,0,0,0
 
-access_process_log_admin,laundry.process.log admin,model_laundry_process_log,group_laundry_admin,1,1,1,1
-access_process_log_system,laundry.process.log system,model_laundry_process_log,base.group_system,1,1,1,1
-access_process_log_operator,laundry.process.log operator,model_laundry_process_log,group_laundry_operator,1,1,0,0
 
-access_qc_admin,laundry.qc admin,model_laundry_qc,group_laundry_admin,1,1,1,1
+access_qc_manager,laundry.qc manager,model_laundry_qc,group_laundry_manager,1,1,1,1
 access_qc_system,laundry.qc system,model_laundry_qc,base.group_system,1,1,1,1
-access_qc_qc,laundry.qc qc,model_laundry_qc,group_laundry_qc,1,1,0,0
+access_qc_operator,laundry.qc operator,model_laundry_qc,group_laundry_operator,1,1,1,0
 
-access_womp_admin,laundry.womp admin,model_laundry_womp,group_laundry_admin,1,1,1,1
+access_order_qc_wizard_manager,laundry.order.qc.wizard manager,model_laundry_order_qc_wizard,group_laundry_manager,1,1,1,1
+access_order_qc_wizard_operator,laundry.order.qc.wizard operator,model_laundry_order_qc_wizard,group_laundry_operator,1,1,1,1
+access_order_qc_wizard_cashier,laundry.order.qc.wizard cashier,model_laundry_order_qc_wizard,group_laundry_cashier,1,1,1,1
+access_order_qc_wizard_system,laundry.order.qc.wizard system,model_laundry_order_qc_wizard,base.group_system,1,1,1,1
+
+access_womp_manager,laundry.womp manager,model_laundry_womp,group_laundry_manager,1,1,1,1
 access_womp_system,laundry.womp system,model_laundry_womp,base.group_system,1,1,1,1
 
-access_wizard_admin,laundry.process.wizard admin,model_laundry_process_wizard,group_laundry_admin,1,1,1,1
-access_wizard_system,laundry.process.wizard system,model_laundry_process_wizard,base.group_system,1,1,1,1
-access_wizard_operator,laundry.process.wizard operator,model_laundry_process_wizard,group_laundry_operator,1,1,0,0
 
-access_assign_operator_admin,laundry.assign.operator admin,model_laundry_assign_operator,group_laundry_admin,1,1,1,1
+
+access_assign_operator_manager,laundry.assign.operator manager,model_laundry_assign_operator,group_laundry_manager,1,1,1,1
 access_assign_operator_system,laundry.assign.operator system,model_laundry_assign_operator,base.group_system,1,1,1,1
 access_assign_operator_cashier,laundry.assign.operator cashier,model_laundry_assign_operator,group_laundry_cashier,1,1,1,1
 access_assign_operator_operator,laundry.assign.operator operator,model_laundry_assign_operator,group_laundry_operator,1,1,1,1
