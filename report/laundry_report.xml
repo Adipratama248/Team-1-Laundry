@@ -5,8 +5,8 @@
         <field name="name">Laundry Order Report</field>
         <field name="model">laundry.order</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">Team-1-Laundry.laundry_order_report_template</field>
-        <field name="report_file">Team-1-Laundry.laundry_order_report_template</field>
+        <field name="report_name">laundry.laundry_order_report_template</field>
+        <field name="report_file">laundry.laundry_order_report_template</field>
         <field name="print_report_name">'Laundry Order - %s' % (object.name)</field>
         <field name="binding_model_id" ref="model_laundry_order"/>
         <field name="binding_type">report</field>

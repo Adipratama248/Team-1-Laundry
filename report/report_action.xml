@@ -5,12 +5,12 @@
         <field name="name">Laundry Tag</field>
         <field name="model">laundry.order</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">Team-1-Laundry.report_laundry_tag</field>
-        <field name="report_file">Team-1-Laundry.report_laundry_tag</field>
+        <field name="report_name">laundry.report_laundry_tag</field>
+        <field name="report_file">laundry.report_laundry_tag</field>
         <field name="print_report_name">'Laundry Tag - %s' % (object.name)</field>
         <field name="binding_model_id" ref="model_laundry_order"/>
         <field name="binding_view_types">form</field>
-        <field name="groups_id" eval="[(4, ref('Team-1-Laundry.group_laundry_manager')),(4, ref('Team-1-Laundry.group_laundry_cashier')),(4, ref('Team-1-Laundry.group_laundry_operator'))]"/>
+        <field name="groups_id" eval="[(4, ref('laundry.group_laundry_manager')),(4, ref('laundry.group_laundry_cashier')),(4, ref('laundry.group_laundry_operator'))]"/>
     </record>
 
 </odoo>

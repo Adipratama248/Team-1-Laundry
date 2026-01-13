@@ -57,12 +57,12 @@ class LaundryOrder(models.Model):
         string="Status Pembayaran",
         related="invoice_id.payment_state",
         store=True,
-        groups="Team-1-Laundry.group_laundry_cashier,Team-1-Laundry.group_laundry_manager",
+        groups="laundry.group_laundry_cashier,laundry.group_laundry_manager",
     )
     delivery_alert = fields.Char(
         string="Alert",
         compute="_compute_delivery_alert",
-        groups="Team-1-Laundry.group_laundry_cashier,Team-1-Laundry.group_laundry_manager",
+        groups="laundry.group_laundry_cashier,laundry.group_laundry_manager",
     )
 
     # New fields for View Logic
@@ -78,9 +78,9 @@ class LaundryOrder(models.Model):
 
     def _compute_button_visibility(self):
         # Check groups once for the user
-        is_manager = self.env.user.has_group("Team-1-Laundry.group_laundry_manager")
-        is_operator = self.env.user.has_group("Team-1-Laundry.group_laundry_operator")
-        is_cashier = self.env.user.has_group("Team-1-Laundry.group_laundry_cashier")
+        is_manager = self.env.user.has_group("laundry.group_laundry_manager")
+        is_operator = self.env.user.has_group("laundry.group_laundry_operator")
+        is_cashier = self.env.user.has_group("laundry.group_laundry_cashier")
 
         for rec in self:
             # Hide operator buttons if user is NOT an operator OR if they ARE a manager
@@ -127,7 +127,7 @@ class LaundryOrder(models.Model):
         compute="_compute_total",
         currency_field="currency_id",
         store=True,
-        groups="Team-1-Laundry.group_laundry_cashier,Team-1-Laundry.group_laundry_manager",
+        groups="laundry.group_laundry_cashier,laundry.group_laundry_manager",
     )
     currency_id = fields.Many2one(
         "res.currency", related="company_id.currency_id", readonly=True
