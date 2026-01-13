@@ -37,15 +37,15 @@
                     <!-- ================================================================= -->
 
                     <!-- 1. CONFIRM ORDER (Draft -> Received) -->
-                    <button name="action_confirm" string="Confirm Order" type="object" class="oe_highlight" invisible="not id or state != 'draft' or hide_manager_buttons" groups="Team-1-Laundry.group_laundry_cashier,Team-1-Laundry.group_laundry_manager"/>
+                    <button name="action_confirm" string="Confirm Order" type="object" class="oe_highlight" invisible="not id or state != 'draft' or hide_manager_buttons" groups="laundry.group_laundry_cashier,laundry.group_laundry_manager"/>
 
                     <!-- 2. DELIVER (Ready -> Delivered) -->
                     <!-- Di sini validasi pembayaran akan berjalan -->
-                    <button name="action_next_stage" string="Deliver" type="object" class="btn-success" invisible="state != 'ready' or hide_manager_buttons" groups="Team-1-Laundry.group_laundry_cashier,Team-1-Laundry.group_laundry_manager"/>
+                    <button name="action_next_stage" string="Deliver" type="object" class="btn-success" invisible="state != 'ready' or hide_manager_buttons" groups="laundry.group_laundry_cashier,laundry.group_laundry_manager"/>
 
                     <!-- 3. INVOICING & PAYMENT -->
-                    <button name="action_generate_invoice" string="Create Invoice" type="object" class="btn-secondary" invisible="invoice_id or state in ('draft', 'cancel') or hide_manager_buttons" groups="Team-1-Laundry.group_laundry_manager,Team-1-Laundry.group_laundry_cashier"/>
-                    <button name="action_register_payment" string="Pay" type="object" class="btn-primary" invisible="not invoice_id or state in ('draft', 'cancel') or status_pembayaran == 'paid' or hide_manager_buttons" groups="Team-1-Laundry.group_laundry_cashier,Team-1-Laundry.group_laundry_manager"/>
+                    <button name="action_generate_invoice" string="Create Invoice" type="object" class="btn-secondary" invisible="invoice_id or state in ('draft', 'cancel') or hide_manager_buttons" groups="laundry.group_laundry_manager,laundry.group_laundry_cashier"/>
+                    <button name="action_register_payment" string="Pay" type="object" class="btn-primary" invisible="not invoice_id or state in ('draft', 'cancel') or status_pembayaran == 'paid' or hide_manager_buttons" groups="laundry.group_laundry_cashier,laundry.group_laundry_manager"/>
 
                     <!-- ================================================================= -->
                     <!-- ZONE: OPERATOR -->
@@ -53,13 +53,13 @@
 
                     <!-- 4. START JOB (Received -> Washing) -->
                     <!-- Operator klik ini saat mau kerja, Waktu mulai dihitung -->
-                    <button name="action_next_stage" string="Start Job" type="object" class="oe_highlight" invisible="state != 'received' or hide_operator_buttons" groups="Team-1-Laundry.group_laundry_operator"/>
+                    <button name="action_next_stage" string="Start Job" type="object" class="oe_highlight" invisible="state != 'received' or hide_operator_buttons" groups="laundry.group_laundry_operator"/>
 
                     <!-- 5. NEXT STAGE (Washing -> Drying -> Ironing) -->
-                    <button name="action_next_stage" string="Next Stage" type="object" class="oe_highlight" invisible="state not in ('washing', 'drying', 'ironing') or hide_operator_buttons" groups="Team-1-Laundry.group_laundry_operator"/>
+                    <button name="action_next_stage" string="Next Stage" type="object" class="oe_highlight" invisible="state not in ('washing', 'drying', 'ironing') or hide_operator_buttons" groups="laundry.group_laundry_operator"/>
 
                     <!-- 6. QC PROCESS (QC -> Ready) - SEKARANG OLEH OPERATOR -->
-                    <button name="action_open_qc" string="Quality Check" type="object" class="oe_highlight" invisible="state != 'qc' or hide_operator_buttons" groups="Team-1-Laundry.group_laundry_operator"/>
+                    <button name="action_open_qc" string="Quality Check" type="object" class="oe_highlight" invisible="state != 'qc' or hide_operator_buttons" groups="laundry.group_laundry_operator"/>
 
                     <!-- ================================================================= -->
                     <!-- ZONE: SHARED / ALL -->
@@ -116,7 +116,7 @@
                                     <field name="uom_id" readonly="1" force_save="1"/>
                                     <field name="price_unit"/>
                                     <field name="subtotal" readonly="1"/>
-                                    <button name="action_open_condition_in" icon="fa-info-circle" type="object" class="btn-link" invisible="order_state not in ('draft', 'received')" groups="Team-1-Laundry.group_laundry_cashier, Team-1-Laundry.group_laundry_manager"/>
+                                    <button name="action_open_condition_in" icon="fa-info-circle" type="object" class="btn-link" invisible="order_state not in ('draft', 'received')" groups="laundry.group_laundry_cashier, laundry.group_laundry_manager"/>
                                 </list>
                             </field>
                         </page>

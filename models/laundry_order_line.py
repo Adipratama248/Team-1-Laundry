@@ -47,14 +47,14 @@ class LaundryOrderLine(models.Model):
     quantity = fields.Float(string="Quantity", default=1.0)
     price_unit = fields.Float(
         string="Price",
-        groups="Team-1-Laundry.group_laundry_cashier,Team-1-Laundry.group_laundry_manager",
+        groups="laundry.group_laundry_cashier,laundry.group_laundry_manager",
     )
     subtotal = fields.Monetary(
         string="Subtotal",
         compute="_compute_subtotal",
         store=True,
         currency_field="currency_id",
-        groups="Team-1-Laundry.group_laundry_cashier,Team-1-Laundry.group_laundry_manager",
+        groups="laundry.group_laundry_cashier,laundry.group_laundry_manager",
     )
     currency_id = fields.Many2one(
         "res.currency", related="laundry_order_id.currency_id", readonly=True
