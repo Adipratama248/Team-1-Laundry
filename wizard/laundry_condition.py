@@ -26,28 +26,55 @@ class LaundryCondition(models.TransientModel):
 
     def action_save_condition(self):
         self.ensure_one()
+
+        if not self.line_id:
+            return {'type': 'ir.actions.act_window_close'}
+
+        order = self.line_id.laundry_order_id
+
+        # Cari atau buat QC
+        qc = self.env['laundry.qc'].search(
+            [('laundry_order_id', '=', order.id)],
+            limit=1
+        )
+        if not qc:
+            qc = self.env['laundry.qc'].create({
+                'laundry_order_id': order.id
+            })
+
+        # Bangun catatan kondisi
         notes = []
-        
-        # Logic penggabungan teks
+
         if self.is_torn:
             det = f" ({self.torn_note})" if self.torn_note else ""
-            notes.append(f"[SOBEK{det}]")
-            
+            notes.append(f"Sobek{det}")
+
         if self.is_stain:
             jenis = dict(self._fields['stain_type'].selection).get(self.stain_type, '')
-            notes.append(f"[NODA: {jenis}]")
-            
-        if self.is_faded:
-            notes.append("[LUNTUR]")
-            
-        if self.is_button_missing:
-            notes.append("[KANCING HILANG]")
-            
-        if self.additional_note:
-            notes.append(f"Note: {self.additional_note}")
+            notes.append(f"Noda: {jenis}")
 
-        # Update ke Line yang memanggil wizard ini
-        final_note = " ".join(notes)
-        self.line_id.write({'note_in': final_note})
-        
+        if self.is_faded:
+            notes.append("Luntur")
+
+        if self.is_button_missing:
+            notes.append("Kancing Hilang")
+
+        if self.additional_note:
+            notes.append(self.additional_note)
+
+        summary = " | ".join(notes) if notes else "Tidak ada catatan"
+
+        # Format per item
+        line_label = self.line_id.product_id.display_name or "Item"
+        new_entry = f"- {line_label}: {summary}"
+
+        # APPEND ke condition_before (bukan replace)
+        qc.condition_before = (
+            (qc.condition_before + "\n" if qc.condition_before else "")
+            + new_entry
+        )
+
+        # Tetap simpan ke line (opsional, tapi kamu sudah pakai)
+        self.line_id.note_in = summary
+
         return {'type': 'ir.actions.act_window_close'}

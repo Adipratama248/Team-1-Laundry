@@ -31,3 +31,8 @@ access_assign_operator_manager,laundry.assign.operator manager,model_laundry_ass
 access_assign_operator_system,laundry.assign.operator system,model_laundry_assign_operator,base.group_system,1,1,1,1
 access_assign_operator_cashier,laundry.assign.operator cashier,model_laundry_assign_operator,group_laundry_cashier,1,1,1,1
 access_assign_operator_operator,laundry.assign.operator operator,model_laundry_assign_operator,group_laundry_operator,1,1,1,1
+
+access_laundry_condition_manager,laundry.condition manager,model_laundry_condition,group_laundry_manager,1,1,1,1
+access_laundry_condition_system,laundry.condition system,model_laundry_condition,base.group_system,1,1,1,1
+access_laundry_condition_cashier,laundry.condition cashier,model_laundry_condition,group_laundry_cashier,1,1,1,1
+

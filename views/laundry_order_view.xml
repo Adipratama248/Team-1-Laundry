@@ -19,12 +19,7 @@
                 <field name="total_amount" widget="monetary"/>
                 <field name="currency_id" column_invisible="True"/>
                 <field name="state" widget="badge" decoration-success="state == 'delivered'" decoration-muted="state in ('washing','drying','ironing','qc')" decoration-info="state == 'ready'"/>
-                <field name="delivery_alert" 
-                    widget="badge" 
-                    decoration-success="delivery_alert == '✅ SIAP DIAMBIL (LUNAS)'"
-                    decoration-danger="delivery_alert == '⚠️ SIAP - BELUM LUNAS'"
-                    decoration-bf="1"
-                    optional="show"/>
+                <field name="delivery_alert" widget="badge" decoration-success="delivery_alert == '✅ SIAP DIAMBIL (LUNAS)'" decoration-danger="delivery_alert == '⚠️ SIAP - BELUM LUNAS'" decoration-bf="1" optional="show"/>
             </list>
         </field>
     </record>
@@ -42,15 +37,15 @@
                     <!-- ================================================================= -->
 
                     <!-- 1. CONFIRM ORDER (Draft -> Received) -->
-                    <button name="action_confirm" string="Confirm Order" type="object" class="oe_highlight" invisible="not id or state != 'draft' or hide_manager_buttons" groups="laundry.group_laundry_cashier,laundry.group_laundry_manager"/>
+                    <button name="action_confirm" string="Confirm Order" type="object" class="oe_highlight" invisible="not id or state != 'draft' or hide_manager_buttons" groups="Team-1-Laundry.group_laundry_cashier,Team-1-Laundry.group_laundry_manager"/>
 
                     <!-- 2. DELIVER (Ready -> Delivered) -->
                     <!-- Di sini validasi pembayaran akan berjalan -->
-                    <button name="action_next_stage" string="Deliver" type="object" class="btn-success" invisible="state != 'ready' or hide_manager_buttons" groups="laundry.group_laundry_cashier,laundry.group_laundry_manager"/>
+                    <button name="action_next_stage" string="Deliver" type="object" class="btn-success" invisible="state != 'ready' or hide_manager_buttons" groups="Team-1-Laundry.group_laundry_cashier,Team-1-Laundry.group_laundry_manager"/>
 
                     <!-- 3. INVOICING & PAYMENT -->
-                    <button name="action_generate_invoice" string="Create Invoice" type="object" class="btn-secondary" invisible="invoice_id or state in ('draft', 'cancel') or hide_manager_buttons" groups="laundry.group_laundry_manager,laundry.group_laundry_cashier"/>
-                    <button name="action_register_payment" string="Pay" type="object" class="btn-primary" invisible="not invoice_id or state in ('draft', 'cancel') or status_pembayaran == 'paid' or hide_manager_buttons" groups="laundry.group_laundry_cashier,laundry.group_laundry_manager"/>
+                    <button name="action_generate_invoice" string="Create Invoice" type="object" class="btn-secondary" invisible="invoice_id or state in ('draft', 'cancel') or hide_manager_buttons" groups="Team-1-Laundry.group_laundry_manager,Team-1-Laundry.group_laundry_cashier"/>
+                    <button name="action_register_payment" string="Pay" type="object" class="btn-primary" invisible="not invoice_id or state in ('draft', 'cancel') or status_pembayaran == 'paid' or hide_manager_buttons" groups="Team-1-Laundry.group_laundry_cashier,Team-1-Laundry.group_laundry_manager"/>
 
                     <!-- ================================================================= -->
                     <!-- ZONE: OPERATOR -->
@@ -58,18 +53,18 @@
 
                     <!-- 4. START JOB (Received -> Washing) -->
                     <!-- Operator klik ini saat mau kerja, Waktu mulai dihitung -->
-                    <button name="action_next_stage" string="Start Job" type="object" class="oe_highlight" invisible="state != 'received' or hide_operator_buttons" groups="laundry.group_laundry_operator"/>
+                    <button name="action_next_stage" string="Start Job" type="object" class="oe_highlight" invisible="state != 'received' or hide_operator_buttons" groups="Team-1-Laundry.group_laundry_operator"/>
 
                     <!-- 5. NEXT STAGE (Washing -> Drying -> Ironing) -->
-                    <button name="action_next_stage" string="Next Stage" type="object" class="oe_highlight" invisible="state not in ('washing', 'drying', 'ironing') or hide_operator_buttons" groups="laundry.group_laundry_operator"/>
+                    <button name="action_next_stage" string="Next Stage" type="object" class="oe_highlight" invisible="state not in ('washing', 'drying', 'ironing') or hide_operator_buttons" groups="Team-1-Laundry.group_laundry_operator"/>
 
                     <!-- 6. QC PROCESS (QC -> Ready) - SEKARANG OLEH OPERATOR -->
-                    <button name="action_open_qc" string="Quality Check" type="object" class="oe_highlight" invisible="state != 'qc' or hide_operator_buttons" groups="laundry.group_laundry_operator"/>       
+                    <button name="action_open_qc" string="Quality Check" type="object" class="oe_highlight" invisible="state != 'qc' or hide_operator_buttons" groups="Team-1-Laundry.group_laundry_operator"/>
 
                     <!-- ================================================================= -->
                     <!-- ZONE: SHARED / ALL -->
                     <!-- ================================================================= -->
-                    
+
                     <!-- Cancel & Draft (Bisa dibatasi ke Admin jika perlu) -->
                     <!-- <button name="action_cancel" string="Cancel" type="object" invisible="not id or state in ('delivered', 'cancel')"/> -->
                     <button name="action_draft" string="Set to Draft" type="object" invisible="state != 'cancel'"/>
@@ -104,11 +99,7 @@
                             <field name="date_received"/>
                             <field name="date_estimated" force_save="1"/>
                             <field name="date_finished" readonly="1"/>
-                            <field name="status_pembayaran" widget="badge"
-                                   decoration-info="status_pembayaran == 'draft'"
-                                   decoration-danger="status_pembayaran == 'not_paid'"
-                                   decoration-warning="status_pembayaran in ('partial', 'in_payment')"
-                                   decoration-success="status_pembayaran in ('paid', 'reversed')" />
+                            <field name="status_pembayaran" widget="badge" decoration-info="status_pembayaran == 'draft'" decoration-danger="status_pembayaran == 'not_paid'" decoration-warning="status_pembayaran in ('partial', 'in_payment')" decoration-success="status_pembayaran in ('paid', 'reversed')" />
                         </group>
                     </group>
 
@@ -118,13 +109,14 @@
                             <field name="line_laundry_ids" readonly="state != 'draft'">
                                 <list editable="bottom">
                                     <field name="product_id" domain="[('is_laundry_service', '=', True)]"/>
-                                    <field name="laundry_service_type" optional="show"/> 
+                                    <field name="laundry_service_type" optional="show"/>
                                     <field name="note_in" placeholder="Contoh: Kancing lepas, Noda tinta..."/>
-                                    <field name="note_out" optional="hide" readonly="state != 'qc'"/>
+                                    <!-- <field name="note_out" optional="hide" readonly="state != 'qc'"/> -->
                                     <field name="quantity"/>
                                     <field name="uom_id" readonly="1" force_save="1"/>
                                     <field name="price_unit"/>
                                     <field name="subtotal" readonly="1"/>
+                                    <button name="action_open_condition_in" icon="fa-info-circle" type="object" class="btn-link" invisible="order_state not in ('draft', 'received')" groups="Team-1-Laundry.group_laundry_cashier, Team-1-Laundry.group_laundry_manager"/>
                                 </list>
                             </field>
                         </page>
@@ -167,10 +159,8 @@
                 <field name="name"/>
                 <field name="partner_id"/>
                 <field name="operator_id"/>
-                <filter name="filter_today" string="Today"
-                        domain="[('date_received','>=',context_today())]"/>
-                <filter name="filter_not_finished" string="Not Finished"
-                        domain="[('state','not in',('delivered','cancel'))]"/>
+                <filter name="filter_today" string="Today" domain="[('date_received','>=',context_today())]"/>
+                <filter name="filter_not_finished" string="Not Finished" domain="[('state','not in',('delivered','cancel'))]"/>
                 <group expand="0" string="Group By">
                     <filter name="groupby_state" string="Status" domain="[]" context="{'group_by':'state'}"/>
                     <filter name="groupby_partner" string="Customer" domain="[]" context="{'group_by':'partner_id'}"/>
@@ -187,9 +177,9 @@
         <field name="res_model">laundry.order</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+            <p class="o_view_nocontent_smiling_face">
             Buat pesanan laundry baru
-          </p>
+            </p>
         </field>
     </record>
 

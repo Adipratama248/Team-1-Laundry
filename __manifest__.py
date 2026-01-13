@@ -29,6 +29,7 @@
 
         'wizard/laundry_assign_operator.xml',
         'wizard/laundry_order_qc_wizard.xml',
+        'wizard/laundry_condition.xml',
 
         'data/laundry_sequence.xml',
         

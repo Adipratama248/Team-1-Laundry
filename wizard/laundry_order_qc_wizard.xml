@@ -13,6 +13,7 @@
                     <field name="qty_check"/>
                 </group>
                 <group>
+                    <field name="condition_after" placeholder="Jelaskan kondisi barang setelah proses (jika ada catatan khusus)..."/>
                     <field name="note" placeholder="Notes..."/>
                 </group>
                 <footer>

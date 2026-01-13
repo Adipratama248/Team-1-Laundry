@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields
+from odoo import models, fields, api
+
 
 class LaundryQC(models.Model):
-    _name = 'laundry.qc'
-    _description = 'Laundry Quality Control'
-    _order = 'approved_date desc'
+    _name = "laundry.qc"
+    _description = "Laundry Quality Control"
+    _order = "approved_date desc"
 
-    laundry_order_id = fields.Many2one('laundry.order', string='Laundry Order', required=True, ondelete='cascade')
+    laundry_order_id = fields.Many2one(
+        "laundry.order", string="Laundry Order", required=True, ondelete="cascade"
+    )
 
-    condition_before = fields.Text(string='Condition Before')
-    condition_after = fields.Text(string='Condition After')
+    condition_before = fields.Text(string="Condition Before")
+    condition_after = fields.Text(string="Condition After")
 
     # Checklist Fields
     clean_check = fields.Boolean(string='Clean / No Stains', default=False)
